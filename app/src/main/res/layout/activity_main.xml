@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -11,42 +12,55 @@
 
     <!-- Password Input -->
 
+    <!-- Login Button -->
+
     <EditText
         android:id="@+id/etUsername"
-        android:layout_width="304dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="224dp"
+        android:layout_width="310dp"
+        android:layout_height="49dp"
+        android:layout_marginTop="184dp"
         android:hint="Username"
         android:padding="11dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintMarginTop="100dp"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etPassword"
-        android:layout_width="306dp"
-        android:layout_height="40dp"
+        android:layout_width="311dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="44dp"
         android:hint="Password"
         android:inputType="textPassword"
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintMarginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etUsername" />
 
-    <!-- Login Button -->
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="314dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="136dp"
+        android:layout_width="301dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="50dp"
         android:text="Login"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.453"
-        app:layout_constraintMarginTop="20dp"
+        app:layout_constraintHorizontal_bias="0.536"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPassword" />
+        app:layout_constraintTop_toBottomOf="@id/etPassword"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="301dp"
+        android:layout_height="63dp"
+        android:text="Register"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.545"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+        app:layout_constraintVertical_bias="0.068" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
