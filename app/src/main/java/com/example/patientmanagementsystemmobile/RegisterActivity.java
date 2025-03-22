@@ -25,7 +25,7 @@ public class RegisterActivity extends AppCompatActivity {
             return insets;
         });
 
-        EditText dateField = findViewById(R.id.dateField);
+        EditText dateField = findViewById(R.id.birthDateField);
 
         dateField.setOnClickListener(v -> {
             // Get current date

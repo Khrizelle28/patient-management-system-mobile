@@ -2,4 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Gradient Colors -->
+    <color name="blue_start">#0047AB</color>  <!-- Dark Blue -->
+    <color name="blue_end">#55E6C1</color>   <!-- Cyan -->
 </resources>

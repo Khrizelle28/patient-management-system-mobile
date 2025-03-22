@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Patient Management System</string>
-    <string-array name="gender">
-        <item>Male</item>
-        <item>Female</item>
+    <string-array name="civil_status">
+        <item>Single</item>
+        <item>Married</item>
+        <item>Widowed</item>
     </string-array>
 </resources>
