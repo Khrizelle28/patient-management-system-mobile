@@ -19,7 +19,7 @@
         android:layout_width="310dp"
         android:layout_height="49dp"
         android:layout_marginTop="184dp"
-        android:hint="Username"
+        android:hint="Email"
         android:padding="11dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
