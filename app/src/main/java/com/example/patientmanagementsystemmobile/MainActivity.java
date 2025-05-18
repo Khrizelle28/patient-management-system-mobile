@@ -41,25 +41,25 @@ public class MainActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
 
-        btnLogin   = findViewById(R.id.btnLogin);
+//        btnLogin   = findViewById(R.id.btnLogin);
 
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        btnLogin.setOnClickListener(v -> {
-            String email = etUsername.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-            loginUser(email, password);
-        });
-
-//        Button registerButton = findViewById(R.id.btnRegister);
-//        registerButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // Navigate to RegisterActivity
-//                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-//                startActivity(intent);
-//            }
+//        btnLogin.setOnClickListener(v -> {
+//            String email = etUsername.getText().toString().trim();
+//            String password = etPassword.getText().toString().trim();
+//            loginUser(email, password);
 //        });
+
+        Button registerButton = findViewById(R.id.btnLogin);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to RegisterActivity
+                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void loginUser(String email, String password) {
