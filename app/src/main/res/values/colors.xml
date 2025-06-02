@@ -5,4 +5,8 @@
     <!-- Gradient Colors -->
     <color name="blue_start">#0047AB</color>  <!-- Dark Blue -->
     <color name="blue_end">#55E6C1</color>   <!-- Cyan -->
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
 </resources>
