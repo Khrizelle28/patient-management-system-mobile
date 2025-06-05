@@ -1,33 +1,34 @@
+// Create this file: adapter/PeopleAdapter.java
 package com.example.patientmanagementsystemmobile.adapter;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.Person;
-import java.util.*;
+import java.util.List;
 
 public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.PersonViewHolder> {
 
     private List<Person> people;
-    private OnPersonClickListener listener;
+    private OnPersonClickListener onPersonClickListener;
 
+    // Interface for click events
     public interface OnPersonClickListener {
         void onPersonClick(Person person);
     }
 
+    // Constructor
     public PeopleAdapter(List<Person> people) {
         this.people = people;
     }
 
+    // Set click listener
     public void setOnPersonClickListener(OnPersonClickListener listener) {
-        this.listener = listener;
+        this.onPersonClickListener = listener;
     }
 
     @NonNull
@@ -42,52 +43,53 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.PersonView
     public void onBindViewHolder(@NonNull PersonViewHolder holder, int position) {
         Person person = people.get(position);
         holder.bind(person);
+
+        // Set click listener
+        holder.itemView.setOnClickListener(v -> {
+            if (onPersonClickListener != null) {
+                onPersonClickListener.onPersonClick(person);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return people.size();
+        return people != null ? people.size() : 0;
     }
 
+    // Method to update the list
     public void updatePeople(List<Person> newPeople) {
         this.people = newPeople;
         notifyDataSetChanged();
     }
 
-    class PersonViewHolder extends RecyclerView.ViewHolder {
-        private TextView nameText;
-        private TextView specialtyText;
-        private TextView timeText;
-        private TextView statusText;
-        private View itemView;
+    // ViewHolder class
+    public static class PersonViewHolder extends RecyclerView.ViewHolder {
+        private TextView nameTextView;
+        private TextView specialtyTextView;
+        private TextView scheduleTextView;
+        private TextView availabilityTextView;
 
         public PersonViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.itemView = itemView;
-            nameText = itemView.findViewById(R.id.nameText);
-            specialtyText = itemView.findViewById(R.id.specialtyText);
-            timeText = itemView.findViewById(R.id.timeText);
-            statusText = itemView.findViewById(R.id.statusText);
-
-            itemView.setOnClickListener(v -> {
-                if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                    listener.onPersonClick(people.get(getAdapterPosition()));
-                }
-            });
+            nameTextView = itemView.findViewById(R.id.nameText);
+            specialtyTextView = itemView.findViewById(R.id.specialtyText);
+            scheduleTextView = itemView.findViewById(R.id.timeText);
+            availabilityTextView = itemView.findViewById(R.id.statusText);
         }
 
         public void bind(Person person) {
-            nameText.setText(person.getName());
-            specialtyText.setText(person.getSpecialty());
-            timeText.setText(person.getAvailableTime());
+            nameTextView.setText(person.getName());
+            specialtyTextView.setText(person.getSpecialty());
+            scheduleTextView.setText(person.getSchedule());
 
             if (person.isAvailable()) {
-                statusText.setText("Available");
-                statusText.setTextColor(Color.GREEN);
+                availabilityTextView.setText("Available");
+                availabilityTextView.setTextColor(itemView.getContext().getResources().getColor(android.R.color.holo_green_dark));
                 itemView.setAlpha(1.0f);
             } else {
-                statusText.setText("Unavailable");
-                statusText.setTextColor(Color.RED);
+                availabilityTextView.setText("Not Available");
+                availabilityTextView.setTextColor(itemView.getContext().getResources().getColor(android.R.color.holo_red_dark));
                 itemView.setAlpha(0.6f);
             }
         }

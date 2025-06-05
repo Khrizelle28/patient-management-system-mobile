@@ -1,5 +1,7 @@
 package com.example.patientmanagementsystemmobile.network;
 
+import com.example.patientmanagementsystemmobile.api.ApiService;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -16,5 +18,9 @@ public class RetrofitClient {
                     .build();
         }
         return retrofit;
+    }
+
+    public static ApiService getUserApiService() {
+        return getClient().create(ApiService.class);
     }
 }
