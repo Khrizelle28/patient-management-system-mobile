@@ -1,5 +1,6 @@
 package com.example.patientmanagementsystemmobile;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,8 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.patientmanagementsystemmobile.adapter.PeopleAdapter;
 import com.example.patientmanagementsystemmobile.models.Person;
+import com.example.patientmanagementsystemmobile.models.User;
 import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 import com.example.patientmanagementsystemmobile.api.ApiService;
+import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
+import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,6 +40,8 @@ public class AppointmentFragment extends Fragment {
     private String selectedDate;
     private ApiService apiService;
 
+    private User user;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -43,10 +49,10 @@ public class AppointmentFragment extends Fragment {
 
         initViews(view);
         initApiService();
+        initCurrentUser();
         setupRecyclerView();
         setupCalendar();
         loadScheduleData(); // Load data from API
-
         return view;
     }
 
@@ -55,6 +61,10 @@ public class AppointmentFragment extends Fragment {
         selectedDateText = view.findViewById(R.id.selectedDateText);
         peopleRecyclerView = view.findViewById(R.id.peopleRecyclerView);
         scheduleData = new HashMap<>();
+    }
+
+    private void initCurrentUser() {
+        user = RetrofitClient.currentUser;
     }
 
     private void initApiService() {
@@ -100,7 +110,7 @@ public class AppointmentFragment extends Fragment {
                 if (entry.getValue() instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> doctorsList = (List<Map<String, Object>>) entry.getValue();
-
+                    Log.d("Appointment list", "doctor list for: " + doctorsList.toString());
                     List<Person> people = new ArrayList<>();
                     for (Map<String, Object> doctorData : doctorsList) {
                         Person person = parseDoctorToPerson(doctorData);
@@ -146,7 +156,9 @@ public class AppointmentFragment extends Fragment {
                 }
             }
 
-            return new Person(name, specialty, schedule, isAvailable);
+            String id = (String) doctorData.get("id");
+
+            return new Person(id, name, specialty, schedule, isAvailable);
         } catch (Exception e) {
             Log.e("PARSE_ERROR", "Error parsing doctor data: " + e.getMessage());
             return null;
@@ -165,7 +177,7 @@ public class AppointmentFragment extends Fragment {
         int daysAdded = 0;
         int totalDays = 0;
 
-        while (daysAdded < 4 && totalDays < 28) { // Get 4 occurrences of each day
+        while (daysAdded < 7 && totalDays < 9) { // Get 4 occurrences of each day
             int currentDayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
 
             if (currentDayOfWeek == targetDayOfWeek && totalDays > 0) {
@@ -226,12 +238,80 @@ public class AppointmentFragment extends Fragment {
 
             peopleAdapter.setOnPersonClickListener(person -> {
                 if (person.isAvailable()) {
-                    Toast.makeText(getContext(), "Booking appointment with " + person.getName(), Toast.LENGTH_SHORT).show();
+                    showBookingDialog(person);
                 } else {
                     Toast.makeText(getContext(), person.getName() + " is not available", Toast.LENGTH_SHORT).show();
                 }
             });
         }
+    }
+
+    private void showBookingDialog(Person person) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Book Appointment");
+        builder.setMessage("Would you like to book an appointment with " + person.getName() + "?");
+
+        builder.setPositiveButton("Book Now", (dialog, which) -> {
+            // Handle booking logic here
+            bookAppointment(person);
+            Toast.makeText(getContext(), "Appointment booked with " + person.getName(), Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void bookAppointment(Person person) {
+        String id = RetrofitClient.currentUser.getId();
+        String formattedDate = "";
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            format.parse(selectedDate); // Just validate
+            formattedDate = selectedDate;
+        } catch (Exception e) {
+            formattedDate = selectedDate;
+        }
+        // Add your booking logic here
+        // e.g., call API, save to database, etc.
+//        Log.d("AppointmentBooking", "Booking appointment for: " + person.toString() + "ID of Patient use: " + formattedDate + " " + person.getSchedule());
+//        Log.d("User: ", "User Details" + id);
+        AppointmentRequest request = new AppointmentRequest(
+                id,
+                person.getId(), // doctor ID
+                formattedDate, // format: "2024-12-25"
+                person.getSchedule(), // format: "14:30"
+                "" // notes
+        );
+//
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<AppointmentResponse> call = apiService.createAppointment(request);
+
+        call.enqueue(new Callback<AppointmentResponse>() {
+            @Override
+            public void onResponse(Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AppointmentResponse appointmentResponse = response.body();
+                    if (appointmentResponse.isSuccess()) {
+                        Toast.makeText(getContext(), "Appointment booked successfully!", Toast.LENGTH_LONG).show();
+                        // Optionally refresh the UI or navigate to appointments list
+                    } else {
+                        Toast.makeText(getContext(), appointmentResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to book appointment", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AppointmentResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateSelectedDateDisplay() {

@@ -4,6 +4,8 @@ import android.database.Observable;
 
 import com.example.patientmanagementsystemmobile.models.AuthResponse;
 import com.example.patientmanagementsystemmobile.models.User;
+import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
+import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +27,7 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("login")
     Call<AuthResponse> login(
-            @Field("email") String email,
+            @Field("username") String email,
             @Field("password") String password
     );
 
@@ -33,4 +35,7 @@ public interface ApiService {
     @GET("doctor-schedule")
     Call<Map<String, Object>> getDoctorSchedule();
 
+    @Headers("Accept: application/json")
+    @POST("appointments")
+    Call<AppointmentResponse> createAppointment(@Body AppointmentRequest request);
 }

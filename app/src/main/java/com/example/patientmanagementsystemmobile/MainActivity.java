@@ -41,36 +41,40 @@ public class MainActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
 
-//        btnLogin   = findViewById(R.id.btnLogin);
+        btnLogin   = findViewById(R.id.btnLogin);
 
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-//        btnLogin.setOnClickListener(v -> {
-//            String email = etUsername.getText().toString().trim();
-//            String password = etPassword.getText().toString().trim();
-//            loginUser(email, password);
-//        });
-
-        Button registerButton = findViewById(R.id.btnLogin);
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to RegisterActivity
-                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
+        btnLogin.setOnClickListener(v -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            Toast.makeText(MainActivity.this, username + ' ' + password, Toast.LENGTH_SHORT).show();
+            loginUser(username, password);
         });
+
+//        Button registerButton = findViewById(R.id.btnLogin);
+//        registerButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Navigate to RegisterActivity
+//                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 
-    private void loginUser(String email, String password) {
-        Call<AuthResponse> call = apiService.login(email, password);
+    private void loginUser(String username, String password) {
+        Call<AuthResponse> call = apiService.login(username, password);
         call.enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful()) {
                     String token = response.body().getToken();
+                    RetrofitClient.currentUser = response.body().getUser();
                     saveToken(token);
-                    Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                    startActivity(intent);
+//                    Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
                 }

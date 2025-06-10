@@ -1,8 +1,11 @@
 // Create this file: models/Person.java
 package com.example.patientmanagementsystemmobile.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Person {
-    private int id;
+
+    private String id;
     private String name;
     private String specialty;
     private String schedule;
@@ -16,7 +19,8 @@ public class Person {
     public Person() {}
 
     // Constructor for basic info (what you're currently using)
-    public Person(String name, String specialty, String schedule, boolean isAvailable) {
+    public Person(String id, String name, String specialty, String schedule, boolean isAvailable) {
+        this.id = id;
         this.name = name;
         this.specialty = specialty;
         this.schedule = schedule;
@@ -24,7 +28,7 @@ public class Person {
     }
 
     // Full constructor
-    public Person(int id, String name, String specialty, String schedule, boolean isAvailable,
+    public Person(String id, String name, String specialty, String schedule, boolean isAvailable,
                   String licenseNo, String ptrNo, String email, String dayOfWeek) {
         this.id = id;
         this.name = name;
@@ -38,7 +42,7 @@ public class Person {
     }
 
     // Getters
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -75,7 +79,7 @@ public class Person {
     }
 
     // Setters
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
