@@ -138,7 +138,7 @@ public class AppointmentFragment extends Fragment {
 
             String specialty = (String) doctorData.get("specialty");
             if (specialty == null) {
-                specialty = "General Practice";
+                specialty = "Obstretrician - Gynecologyst";
             }
 
             String schedule = (String) doctorData.get("schedule");

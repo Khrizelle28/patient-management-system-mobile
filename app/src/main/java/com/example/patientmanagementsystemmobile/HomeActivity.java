@@ -33,7 +33,7 @@ public class HomeActivity extends AppCompatActivity {
 
             if (id == R.id.home) {
                 replaceFragment(new HomeFragment());
-            } else if (id == R.id.doctors) {
+            } else if (id == R.id.mycart) {
                 replaceFragment(new DoctorsFragment());
             } else if (id == R.id.appointment) {
                 replaceFragment(new AppointmentFragment());

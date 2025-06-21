@@ -1,14 +1,21 @@
 package com.example.patientmanagementsystemmobile.data;
 
+import com.example.patientmanagementsystemmobile.models.Person;
+
 // AppointmentData.java
 public class AppointmentData {
     private int id;
+    private String first_name;
+    private String middle_name;
+    private String last_name;
     private int patient_id;
     private int doctor_id;
     private String appointment_date;
     private String appointment_time;
     private String status;
     private String notes;
+
+    private Person doctor;
 
     // Constructors
     public AppointmentData() {}
@@ -53,6 +60,9 @@ public class AppointmentData {
         return notes;
     }
 
+    public Person getDoctor() { return doctor; }
+
+
     // Setters
     public void setId(int id) {
         this.id = id;
@@ -81,4 +91,6 @@ public class AppointmentData {
     public void setNotes(String notes) {
         this.notes = notes;
     }
+
+    public void setDoctor(Person doctor) { this.doctor = doctor; }
 }

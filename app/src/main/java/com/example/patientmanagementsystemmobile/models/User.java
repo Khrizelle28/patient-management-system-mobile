@@ -10,6 +10,8 @@ public class User {
 
     private String contact_no;
 
+    private String email;
+
 
     // Constructor, getters, and setters
     public String getId() {
@@ -17,6 +19,8 @@ public class User {
     }
 
     public String getFirstName() { return first_name; }
+
+    public String getFullName() { return first_name + " " + last_name; }
 
     public String getMiddleName() { return middle_name; }
 
@@ -43,4 +47,10 @@ public class User {
     public void setContactNo(String contact_no) {
         this.contact_no = contact_no;
     }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getEmail() { return email; }
 }

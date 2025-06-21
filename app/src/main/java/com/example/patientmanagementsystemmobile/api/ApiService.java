@@ -1,13 +1,11 @@
 package com.example.patientmanagementsystemmobile.api;
 
-import android.database.Observable;
-
+import com.example.patientmanagementsystemmobile.response.AppointmentListResponse;
 import com.example.patientmanagementsystemmobile.models.AuthResponse;
 import com.example.patientmanagementsystemmobile.models.User;
 import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
 import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
 
-import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -17,6 +15,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface ApiService {
 
@@ -38,4 +37,8 @@ public interface ApiService {
     @Headers("Accept: application/json")
     @POST("appointments")
     Call<AppointmentResponse> createAppointment(@Body AppointmentRequest request);
+
+    @Headers("Accept: application/json")
+    @GET("appointments/patient/{patientId}")
+    Call<AppointmentListResponse> getPatientAppointments(@Path("patientId") String patientId);
 }

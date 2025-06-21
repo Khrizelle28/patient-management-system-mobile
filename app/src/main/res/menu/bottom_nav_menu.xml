@@ -7,9 +7,9 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/doctors"
-        android:icon="@drawable/doctors"
-        android:title="Doctors" />
+        android:id="@+id/mycart"
+        android:icon="@drawable/mycart"
+        android:title="MyCart" />
 
     <item
         android:id="@+id/appointment"

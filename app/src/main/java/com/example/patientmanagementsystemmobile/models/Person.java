@@ -6,6 +6,11 @@ import com.google.gson.annotations.SerializedName;
 public class Person {
 
     private String id;
+
+    private String first_name;
+
+    private String middle_name;
+    private String last_name;
     private String name;
     private String specialty;
     private String schedule;
@@ -47,7 +52,28 @@ public class Person {
     }
 
     public String getName() {
-        return name;
+        if(name != null)
+        {
+            return name;
+        }
+
+        StringBuilder fullName = new StringBuilder();
+
+        if (first_name != null && !first_name.isEmpty()) {
+            fullName.append(first_name);
+        }
+
+        if (middle_name != null && !middle_name.isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(middle_name);
+        }
+
+        if (last_name != null && !last_name.isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(last_name);
+        }
+
+        return fullName.toString();
     }
 
     public String getSpecialty() {
