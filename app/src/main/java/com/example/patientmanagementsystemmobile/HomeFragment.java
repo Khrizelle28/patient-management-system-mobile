@@ -61,7 +61,7 @@ public class HomeFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
 
         // Set welcome message
-        textWelcome.setText("Welcome back, Patient!");
+        textWelcome.setText("");
         textUpcomingAppointments.setText("Your Appointments");
     }
 
