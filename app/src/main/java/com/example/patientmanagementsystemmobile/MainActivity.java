@@ -2,17 +2,19 @@ package com.example.patientmanagementsystemmobile;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.MotionEvent;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.models.AuthResponse;
@@ -27,11 +29,13 @@ public class MainActivity extends AppCompatActivity {
     EditText etUsername, etPassword;
     Button btnLogin, registerButton;
     ApiService apiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -40,8 +44,35 @@ public class MainActivity extends AppCompatActivity {
 
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
 
-        btnLogin   = findViewById(R.id.btnLogin);
+        // 👁️ Toggle Show/Hide Password with Eye Icon
+        etPassword.setOnTouchListener((v, event) -> {
+            final int DRAWABLE_END = 2;
+
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                Drawable drawableEnd = etPassword.getCompoundDrawables()[DRAWABLE_END];
+                if (drawableEnd != null &&
+                        event.getRawX() >= (etPassword.getRight() - drawableEnd.getBounds().width())) {
+
+                    int inputType = etPassword.getInputType();
+                    if ((inputType & InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
+                            == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+                        // Hide password
+                        etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_off, 0);
+                    } else {
+                        // Show password
+                        etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+                    }
+
+                    etPassword.setSelection(etPassword.getText().length());
+                    return true;
+                }
+            }
+            return false;
+        });
 
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
@@ -50,16 +81,6 @@ public class MainActivity extends AppCompatActivity {
             String password = etPassword.getText().toString().trim();
             loginUser(username, password);
         });
-
-//        Button registerButton = findViewById(R.id.btnLogin);
-//        registerButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // Navigate to RegisterActivity
-//                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-//                startActivity(intent);
-//            }
-//        });
     }
 
     private void loginUser(String username, String password) {
@@ -73,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
                     saveToken(token);
                     Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                     startActivity(intent);
-//                    Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
                 }

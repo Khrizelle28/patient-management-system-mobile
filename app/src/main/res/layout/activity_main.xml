@@ -15,7 +15,7 @@
         android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="← Back"
+        android:text=""
         android:textColor="#005F7F"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -106,10 +106,15 @@
         android:padding="12dp"
         android:textColor="#000"
         android:textSize="16sp"
+        android:drawableEnd="@drawable/ic_eye_off"
+        android:drawablePadding="8dp"
+        android:importantForAutofill="no"
+        android:focusableInTouchMode="true"
         app:layout_constraintTop_toBottomOf="@id/passwordLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"/>
+
 
     <!-- Login Button -->
     <Button
