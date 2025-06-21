@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> {
             String username = etUsername.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
-            Toast.makeText(MainActivity.this, username + ' ' + password, Toast.LENGTH_SHORT).show();
             loginUser(username, password);
         });
 
