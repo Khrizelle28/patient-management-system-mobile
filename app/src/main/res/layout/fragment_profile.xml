@@ -111,9 +111,10 @@
                     android:background="#E0E0E0"
                     android:layout_marginStart="56dp" />
 
-                <!-- Settings -->
+
+                <!-- Activity History -->
                 <LinearLayout
-                    android:id="@+id/settingsLayout"
+                    android:id="@+id/activityHistoryLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -122,27 +123,63 @@
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_settings"
-                        app:tint="#FF9800" />
+                         android:layout_width="24dp"
+                         android:layout_height="24dp"
+                         android:src="@drawable/history"
+                         app:tint="#FF9800" />
 
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Settings"
-                        android:textSize="16sp"
-                        android:textColor="#333333" />
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:layout_marginStart="16dp"
+                         android:text="Activity History"
+                         android:textSize="16sp"
+                         android:textColor="#333333" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#999999" />
+                         <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_arrow_forward"
+                         app:tint="#999999" />
 
                 </LinearLayout>
+
+
+
+
+                <!-- Settings -->
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/settingsLayout"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:padding="16dp"-->
+<!--                    android:background="?android:attr/selectableItemBackground"-->
+<!--                    android:gravity="center_vertical">-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="24dp"-->
+<!--                        android:layout_height="24dp"-->
+<!--                        android:src="@drawable/ic_settings"-->
+<!--                        app:tint="#FF9800" />-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:layout_marginStart="16dp"-->
+<!--                        android:text="Settings"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="#333333" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="20dp"-->
+<!--                        android:layout_height="20dp"-->
+<!--                        android:src="@drawable/ic_arrow_forward"-->
+<!--                        app:tint="#999999" />-->
+
+<!--                </LinearLayout>-->
 
                 <View
                     android:layout_width="match_parent"
@@ -151,37 +188,37 @@
                     android:layout_marginStart="56dp" />
 
                 <!-- Help & Support -->
-                <LinearLayout
-                    android:id="@+id/helpLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:gravity="center_vertical">
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/helpLayout"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:padding="16dp"-->
+<!--                    android:background="?android:attr/selectableItemBackground"-->
+<!--                    android:gravity="center_vertical">-->
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_help"
-                        app:tint="#2196F3" />
+<!--                    <ImageView-->
+<!--                        android:layout_width="24dp"-->
+<!--                        android:layout_height="24dp"-->
+<!--                        android:src="@drawable/ic_help"-->
+<!--                        app:tint="#2196F3" />-->
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Help and Support"
-                        android:textSize="16sp"
-                        android:textColor="#333333" />
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:layout_marginStart="16dp"-->
+<!--                        android:text="Help and Support"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="#333333" />-->
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#999999" />
+<!--                    <ImageView-->
+<!--                        android:layout_width="20dp"-->
+<!--                        android:layout_height="20dp"-->
+<!--                        android:src="@drawable/ic_arrow_forward"-->
+<!--                        app:tint="#999999" />-->
 
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
             </LinearLayout>
 
