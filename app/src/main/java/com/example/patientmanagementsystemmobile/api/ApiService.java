@@ -41,4 +41,8 @@ public interface ApiService {
     @Headers("Accept: application/json")
     @GET("appointments/patient/{patientId}")
     Call<AppointmentListResponse> getPatientAppointments(@Path("patientId") String patientId);
+
+    @Headers("Accept: application/json")
+    @GET("available-products")
+    Call<Map<String, Object>> getAvailableProducts();
 }

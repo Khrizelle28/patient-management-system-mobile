@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/medicationCard"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Medication Image (using emoji for simplicity) -->
+        <TextView
+            android:id="@+id/medicationImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:text="💊"
+            android:textSize="32sp"
+            android:gravity="center"
+            android:background="#E8F4FD" />
+
+        <!-- Medication Name -->
+        <TextView
+            android:id="@+id/medicationName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="Amoxicillin"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Medication Price -->
+        <TextView
+            android:id="@+id/medicationPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="$199.99"
+            android:textColor="#4A90E2"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Medication Description -->
+        <TextView
+            android:id="@+id/medicationDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Used to treat infections such as respiratory tract infections, ear infections, and urinary tract infections."
+            android:textColor="#666666"
+            android:textSize="12sp"
+            android:maxLines="3"
+            android:ellipsize="end" />
+
+        <!-- Read More Button -->
+        <Button
+            android:id="@+id/readMoreButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:background="@android:color/transparent"
+            android:text="Read More →"
+            android:textColor="#4A90E2"
+            android:textSize="12sp"
+            android:textAllCaps="false"
+            android:padding="4dp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
