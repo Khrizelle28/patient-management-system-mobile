@@ -13,48 +13,69 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Search Bar -->
-        <androidx.cardview.widget.CardView
+        <!-- Search Bar with Cart Icon -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="25dp"
-            app:cardElevation="4dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="12dp">
+                android:layout_weight="1"
+                app:cardCornerRadius="25dp"
+                app:cardElevation="4dp">
 
-                <TextView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="8dp"
-                    android:text="🔍"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="12dp"
-                    android:background="@null"
-                    android:text="Medicine, Appointment, Doctor, etc"
-                    android:textColor="#666666"
-                    android:textSize="14sp" />
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <TextView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="8dp"
-                    android:text="⚙️"
-                    android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="8dp"
+                        android:text="🔍"
+                        android:textSize="16sp" />
 
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:background="@null"
+                        android:text="Medicine, Appointment, Doctor, etc"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="⚙️"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/cartIcon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="12dp"
+                android:text="🛒"
+                android:textSize="24sp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+        </LinearLayout>
 
         <!-- Consult Now Card -->
         <androidx.cardview.widget.CardView

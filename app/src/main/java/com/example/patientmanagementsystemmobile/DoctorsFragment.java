@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.cardview.widget.CardView;
@@ -15,6 +16,15 @@ import android.widget.TextView;
 import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.patientmanagementsystemmobile.api.ApiService;
+import com.example.patientmanagementsystemmobile.models.Product;
+import com.example.patientmanagementsystemmobile.network.RetrofitClient;
+import com.example.patientmanagementsystemmobile.response.ProductResponse;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,6 +47,7 @@ public class DoctorsFragment extends Fragment {
     private List<Medication> medicationList;
     private CardView consultCard;
     private Button seeAllButton;
+    private TextView cartIcon;
 
     public DoctorsFragment() {
         // Required empty public constructor
@@ -85,28 +96,54 @@ public class DoctorsFragment extends Fragment {
         consultCard = view.findViewById(R.id.consultCard);
         seeAllButton = view.findViewById(R.id.seeAllButton);
         medicationRecyclerView = view.findViewById(R.id.medicationRecyclerView);
+        cartIcon = view.findViewById(R.id.cartIcon);
     }
 
     private void setupMedicationData() {
         medicationList = new ArrayList<>();
-        medicationList.add(new Medication(
-                "Amoxicillin",
-                "$199.99",
-                "Used to treat infections such as respiratory tract infections, ear infections, and urinary tract infections.",
-                "💊"
-        ));
-        medicationList.add(new Medication(
-                "Paracetamol",
-                "$199.99",
-                "Used to alleviate mild to moderate pain such as headache, muscle aches, and fever.",
-                "💉"
-        ));
+        fetchProductsFromApi();
+    }
+
+    private void fetchProductsFromApi() {
+        ApiService apiService = RetrofitClient.getUserApiService();
+        Call<ProductResponse> call = apiService.getProducts();
+
+        call.enqueue(new Callback<ProductResponse>() {
+            @Override
+            public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Product> products = response.body().getData();
+                    if (products != null && !products.isEmpty()) {
+                        medicationList.clear();
+                        for (Product product : products) {
+                            medicationList.add(new Medication(
+                                    product.getName(),
+                                    "$" + product.getPrice(),
+                                    product.getDescription(),
+                                    "💊", // Default emoji
+                                    product.getStock(),
+                                    product.getExpirationDate(),
+                                    product.getImage()
+                            ));
+                        }
+                        medicationAdapter.notifyDataSetChanged();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to load products", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProductResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupRecyclerView() {
         medicationAdapter = new MedicationAdapter(medicationList);
         medicationRecyclerView.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+                new GridLayoutManager(getContext(), 2)
         );
         medicationRecyclerView.setAdapter(medicationAdapter);
     }
@@ -121,6 +158,11 @@ public class DoctorsFragment extends Fragment {
             Toast.makeText(getContext(), "Showing all medications...", Toast.LENGTH_SHORT).show();
             // TODO: Navigate to all medications activity or expand list
         });
+
+        cartIcon.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Opening cart...", Toast.LENGTH_SHORT).show();
+            // TODO: Navigate to cart/shop fragment
+        });
     }
 
     // Medication data class
@@ -129,6 +171,9 @@ public class DoctorsFragment extends Fragment {
         private String price;
         private String description;
         private String emoji;
+        private int stock;
+        private String expirationDate;
+        private String image;
 
         public Medication(String name, String price, String description, String emoji) {
             this.name = name;
@@ -137,11 +182,24 @@ public class DoctorsFragment extends Fragment {
             this.emoji = emoji;
         }
 
+        public Medication(String name, String price, String description, String emoji, int stock, String expirationDate, String image) {
+            this.name = name;
+            this.price = price;
+            this.description = description;
+            this.emoji = emoji;
+            this.stock = stock;
+            this.expirationDate = expirationDate;
+            this.image = image;
+        }
+
         // Getters
         public String getName() { return name; }
         public String getPrice() { return price; }
         public String getDescription() { return description; }
         public String getEmoji() { return emoji; }
+        public int getStock() { return stock; }
+        public String getExpirationDate() { return expirationDate; }
+        public String getImage() { return image; }
     }
 
     // RecyclerView Adapter

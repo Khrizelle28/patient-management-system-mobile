@@ -45,4 +45,8 @@ public interface ApiService {
     @Headers("Accept: application/json")
     @GET("available-products")
     Call<Map<String, Object>> getAvailableProducts();
+
+    @Headers("Accept: application/json")
+    @GET("products")
+    Call<com.example.patientmanagementsystemmobile.response.ProductResponse> getProducts();
 }
