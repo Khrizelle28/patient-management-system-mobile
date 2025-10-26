@@ -20,6 +20,8 @@ import java.util.List;
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.models.Product;
 import com.example.patientmanagementsystemmobile.network.RetrofitClient;
+import com.example.patientmanagementsystemmobile.repository.CartRepository;
+import com.example.patientmanagementsystemmobile.response.CartResponse;
 import com.example.patientmanagementsystemmobile.response.ProductResponse;
 
 import retrofit2.Call;
@@ -45,9 +47,11 @@ public class DoctorsFragment extends Fragment {
     private RecyclerView medicationRecyclerView;
     private MedicationAdapter medicationAdapter;
     private List<Medication> medicationList;
+    private List<Product> productList;
     private CardView consultCard;
     private Button seeAllButton;
     private TextView cartIcon;
+    private CartRepository cartRepository;
 
     public DoctorsFragment() {
         // Required empty public constructor
@@ -82,12 +86,19 @@ public class DoctorsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        android.util.Log.d("DoctorsFragment", "onCreateView called");
         View view = inflater.inflate(R.layout.fragment_doctors, container, false);
 
-        initializeViews(view);
-        setupMedicationData();
-        setupRecyclerView();
-        setupClickListeners();
+        try {
+            initializeViews(view);
+            setupMedicationData();
+            setupRecyclerView();
+            setupClickListeners();
+            android.util.Log.d("DoctorsFragment", "Fragment setup completed successfully");
+        } catch (Exception e) {
+            android.util.Log.e("DoctorsFragment", "Error in onCreateView", e);
+            Toast.makeText(getContext(), "Error loading fragment: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
 
         return view;
     }
@@ -97,26 +108,51 @@ public class DoctorsFragment extends Fragment {
         seeAllButton = view.findViewById(R.id.seeAllButton);
         medicationRecyclerView = view.findViewById(R.id.medicationRecyclerView);
         cartIcon = view.findViewById(R.id.cartIcon);
+
+        // Initialize cart repository
+        ApiService apiService = RetrofitClient.getUserApiService();
+        cartRepository = new CartRepository(apiService);
     }
 
     private void setupMedicationData() {
-        medicationList = new ArrayList<>();
-        fetchProductsFromApi();
+        android.util.Log.d("DoctorsFragment", "setupMedicationData called");
+        try {
+            medicationList = new ArrayList<>();
+            productList = new ArrayList<>();
+            android.util.Log.d("DoctorsFragment", "Lists initialized, calling fetchProductsFromApi");
+            fetchProductsFromApi();
+        } catch (Exception e) {
+            android.util.Log.e("DoctorsFragment", "Error in setupMedicationData", e);
+            Toast.makeText(getContext(), "Error setting up medications: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void fetchProductsFromApi() {
-        ApiService apiService = RetrofitClient.getUserApiService();
-        Call<ProductResponse> call = apiService.getProducts();
+        try {
+            android.util.Log.d("DoctorsFragment", "Creating API service...");
+            ApiService apiService = RetrofitClient.getUserApiService();
+            android.util.Log.d("DoctorsFragment", "API service created, calling getProducts...");
+            Call<ProductResponse> call = apiService.getProducts();
+            android.util.Log.d("DoctorsFragment", "Call object created, enqueueing request...");
 
-        call.enqueue(new Callback<ProductResponse>() {
+            call.enqueue(new Callback<ProductResponse>() {
             @Override
             public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
+                android.util.Log.d("DoctorsFragment", "Response received. Success: " + response.isSuccessful() + ", Code: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData();
+                    android.util.Log.d("DoctorsFragment", "Products received: " + (products != null ? products.size() : "null"));
+
                     if (products != null && !products.isEmpty()) {
                         medicationList.clear();
+                        productList.clear();
+                        productList.addAll(products); // Store actual products
+
                         for (Product product : products) {
+                            android.util.Log.d("DoctorsFragment", "Adding product: " + product.getName());
                             medicationList.add(new Medication(
+                                    product.getId(),
                                     product.getName(),
                                     "$" + product.getPrice(),
                                     product.getDescription(),
@@ -127,17 +163,38 @@ public class DoctorsFragment extends Fragment {
                             ));
                         }
                         medicationAdapter.notifyDataSetChanged();
+                        android.util.Log.d("DoctorsFragment", "Adapter notified. Total items: " + medicationList.size());
+                        Toast.makeText(getContext(), "Loaded " + products.size() + " products", Toast.LENGTH_SHORT).show();
+                    } else {
+                        android.util.Log.w("DoctorsFragment", "Product list is null or empty");
+                        Toast.makeText(getContext(), "No products available", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(), "Failed to load products", Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Failed to load products. Code: " + response.code();
+                    android.util.Log.e("DoctorsFragment", errorMsg);
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            android.util.Log.e("DoctorsFragment", "Error body: " + errorBody);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ProductResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                String errorMsg = "Network error: " + t.getMessage();
+                android.util.Log.e("DoctorsFragment", errorMsg, t);
+                Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
             }
         });
+        } catch (Exception e) {
+            android.util.Log.e("DoctorsFragment", "Exception in fetchProductsFromApi", e);
+            Toast.makeText(getContext(), "Error creating API call: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setupRecyclerView() {
@@ -160,13 +217,105 @@ public class DoctorsFragment extends Fragment {
         });
 
         cartIcon.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Opening cart...", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to cart/shop fragment
+            // Navigate to CartFragment
+            navigateToCart();
+        });
+    }
+
+    private void navigateToCart() {
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frame_layout, new CartFragment())
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
+
+    private void addToCart(int productId, String productName, int maxStock) {
+        // Show quantity selection dialog
+        showQuantityDialog(productId, productName, maxStock);
+    }
+
+    private void showQuantityDialog(int productId, String productName, int maxStock) {
+        if (getContext() == null) return;
+
+        // Create dialog
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+        android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_quantity, null);
+        builder.setView(dialogView);
+
+        // Find views
+        TextView textProductName = dialogView.findViewById(R.id.textProductName);
+        TextView textQuantity = dialogView.findViewById(R.id.textQuantity);
+        android.widget.ImageButton btnDecrease = dialogView.findViewById(R.id.btnDecrease);
+        android.widget.ImageButton btnIncrease = dialogView.findViewById(R.id.btnIncrease);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btnConfirm);
+
+        textProductName.setText(productName);
+        final int[] quantity = {1}; // Start with quantity 1
+        textQuantity.setText(String.valueOf(quantity[0]));
+
+        android.app.AlertDialog dialog = builder.create();
+
+        // Decrease quantity
+        btnDecrease.setOnClickListener(v -> {
+            if (quantity[0] > 1) {
+                quantity[0]--;
+                textQuantity.setText(String.valueOf(quantity[0]));
+            }
+        });
+
+        // Increase quantity
+        btnIncrease.setOnClickListener(v -> {
+            if (quantity[0] < maxStock) {
+                quantity[0]++;
+                textQuantity.setText(String.valueOf(quantity[0]));
+            } else {
+                Toast.makeText(getContext(), "Maximum stock: " + maxStock, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Cancel
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        // Confirm and add to cart
+        btnConfirm.setOnClickListener(v -> {
+            dialog.dismiss();
+            addToCartConfirmed(productId, productName, quantity[0]);
+        });
+
+        dialog.show();
+    }
+
+    private void addToCartConfirmed(int productId, String productName, int quantity) {
+        android.util.Log.d("DoctorsFragment", "Adding to cart - Product ID: " + productId + ", Quantity: " + quantity);
+
+        cartRepository.addToCart(productId, quantity, new CartRepository.CartCallback() {
+            @Override
+            public void onSuccess(CartResponse response) {
+                android.util.Log.d("DoctorsFragment", "Add to cart success: " + response.isSuccess());
+                if (response.isSuccess()) {
+                    Toast.makeText(getContext(), quantity + "x " + productName + " added to cart!", Toast.LENGTH_SHORT).show();
+                } else {
+                    String errorMsg = response.getMessage() != null ? response.getMessage() : "Failed to add to cart";
+                    android.util.Log.e("DoctorsFragment", "Server error: " + errorMsg);
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                android.util.Log.e("DoctorsFragment", "Add to cart error: " + message);
+                Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+            }
         });
     }
 
     // Medication data class
     public static class Medication {
+        private int id;
         private String name;
         private String price;
         private String description;
@@ -182,7 +331,8 @@ public class DoctorsFragment extends Fragment {
             this.emoji = emoji;
         }
 
-        public Medication(String name, String price, String description, String emoji, int stock, String expirationDate, String image) {
+        public Medication(int id, String name, String price, String description, String emoji, int stock, String expirationDate, String image) {
+            this.id = id;
             this.name = name;
             this.price = price;
             this.description = description;
@@ -193,6 +343,7 @@ public class DoctorsFragment extends Fragment {
         }
 
         // Getters
+        public int getId() { return id; }
         public String getName() { return name; }
         public String getPrice() { return price; }
         public String getDescription() { return description; }
@@ -234,7 +385,9 @@ public class DoctorsFragment extends Fragment {
             private TextView medicationName;
             private TextView medicationPrice;
             private TextView medicationDescription;
+            private TextView medicationStock;
             private Button readMoreButton;
+            private Button addToCartButton;
 
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -243,7 +396,9 @@ public class DoctorsFragment extends Fragment {
                 medicationName = itemView.findViewById(R.id.medicationName);
                 medicationPrice = itemView.findViewById(R.id.medicationPrice);
                 medicationDescription = itemView.findViewById(R.id.medicationDescription);
+                medicationStock = itemView.findViewById(R.id.medicationStock);
                 readMoreButton = itemView.findViewById(R.id.readMoreButton);
+                addToCartButton = itemView.findViewById(R.id.addToCartButton);
             }
 
             public void bind(Medication medication) {
@@ -251,6 +406,19 @@ public class DoctorsFragment extends Fragment {
                 medicationPrice.setText(medication.getPrice());
                 medicationDescription.setText(medication.getDescription());
                 medicationImage.setText(medication.getEmoji());
+                medicationStock.setText("Stock: " + medication.getStock());
+
+                // Disable "Add to Cart" button if out of stock
+                if (medication.getStock() <= 0) {
+                    addToCartButton.setEnabled(false);
+                    addToCartButton.setText("Out of Stock");
+                    addToCartButton.setBackgroundTintList(
+                            android.content.res.ColorStateList.valueOf(
+                                    android.graphics.Color.GRAY));
+                } else {
+                    addToCartButton.setEnabled(true);
+                    addToCartButton.setText("Add to Cart");
+                }
 
                 readMoreButton.setOnClickListener(v -> {
                     Toast.makeText(itemView.getContext(),
@@ -259,11 +427,15 @@ public class DoctorsFragment extends Fragment {
                     // TODO: Navigate to medication details
                 });
 
+                addToCartButton.setOnClickListener(v -> {
+                    // Add to cart with stock info
+                    addToCart(medication.getId(), medication.getName(), medication.getStock());
+                });
+
                 medicationCard.setOnClickListener(v -> {
                     Toast.makeText(itemView.getContext(),
-                            medication.getName() + " selected",
+                            medication.getName() + " - " + medication.getPrice(),
                             Toast.LENGTH_SHORT).show();
-                    // TODO: Add to cart or show details
                 });
             }
         }

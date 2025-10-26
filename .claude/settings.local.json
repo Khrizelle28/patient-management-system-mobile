@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:127.0.0.1)",
-      "Bash(curl http://127.0.0.1:8000/api/products)"
+      "Bash(curl http://127.0.0.1:8000/api/products)",
+      "Read(//d//**)",
+      "Read(//d/laragon/www/patient-management-system/**)",
+      "Bash(cat:*)",
+      "Read(//d/laragon/www/**)",
+      "Bash(php artisan:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

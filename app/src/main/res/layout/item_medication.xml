@@ -63,17 +63,47 @@
             android:maxLines="3"
             android:ellipsize="end" />
 
-        <!-- Read More Button -->
-        <Button
-            android:id="@+id/readMoreButton"
+        <!-- Stock Info -->
+        <TextView
+            android:id="@+id/medicationStock"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:background="@android:color/transparent"
-            android:text="Read More →"
-            android:textColor="#4A90E2"
-            android:textSize="12sp"
-            android:textAllCaps="false"
-            android:padding="4dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Stock: 10"
+            android:textColor="#666666"
+            android:textSize="11sp" />
+
+        <!-- Buttons Layout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/readMoreButton"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:text="Details"
+                android:textColor="#4A90E2"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:padding="2dp" />
+
+            <Button
+                android:id="@+id/addToCartButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add to Cart"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:backgroundTint="#4A90E2"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

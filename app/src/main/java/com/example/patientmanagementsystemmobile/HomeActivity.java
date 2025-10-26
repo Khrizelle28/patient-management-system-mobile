@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.patientmanagementsystemmobile.databinding.ActivityHomeBinding;
 import com.example.patientmanagementsystemmobile.databinding.ActivityMainBinding;
+import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -24,6 +25,10 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        // Initialize RetrofitClient to ensure AuthInterceptor has context
+        RetrofitClient.init(this);
+
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         replaceFragment(new HomeFragment());
@@ -34,6 +39,8 @@ public class HomeActivity extends AppCompatActivity {
             if (id == R.id.home) {
                 replaceFragment(new HomeFragment());
             } else if (id == R.id.mycart) {
+                // Show DoctorsFragment (Shop/Products) when mycart is clicked
+                // User can access cart by clicking cart icon in the shop
                 replaceFragment(new DoctorsFragment());
             } else if (id == R.id.appointment) {
                 replaceFragment(new AppointmentFragment());

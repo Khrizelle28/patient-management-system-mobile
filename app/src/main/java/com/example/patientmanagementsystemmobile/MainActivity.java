@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.models.AuthResponse;
+import com.example.patientmanagementsystemmobile.network.AuthInterceptor;
 import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 
 import retrofit2.Call;
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Initialize RetrofitClient with application context
+        RetrofitClient.init(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -91,7 +95,13 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     String token = response.body().getToken();
                     RetrofitClient.currentUser = response.body().getUser();
-                    saveToken(token);
+
+                    // Save token using AuthInterceptor's method for consistency
+                    AuthInterceptor.saveAuthToken(MainActivity.this, token);
+
+                    // Reset RetrofitClient to use new token
+                    RetrofitClient.resetClient();
+
                     Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                     startActivity(intent);
                 } else {
@@ -105,12 +115,5 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void saveToken(String token) {
-        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("token", token);
-        editor.apply();
     }
 }
