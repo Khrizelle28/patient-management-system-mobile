@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 
@@ -27,6 +28,7 @@ public class ProfileFragment extends Fragment {
     private ImageView profileImage;
     private TextView userName;
     private LinearLayout logoutLayout;
+    private LinearLayout orderHistoryLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,10 +48,8 @@ public class ProfileFragment extends Fragment {
     private void initViews(View view) {
         profileImage = view.findViewById(R.id.profileImage);
         userName = view.findViewById(R.id.userName);
-//        editProfileLayout = view.findViewById(R.id.editProfileLayout);
-//        settingsLayout = view.findViewById(R.id.settingsLayout);
-//        helpLayout = view.findViewById(R.id.helpLayout);
         logoutLayout = view.findViewById(R.id.logoutLayout);
+        orderHistoryLayout = view.findViewById(R.id.activityHistoryLayout);
     }
 
     private void loadUserData() {
@@ -144,5 +144,18 @@ public class ProfileFragment extends Fragment {
         logoutLayout.setOnClickListener(v -> {
             showLogoutDialog();
         });
+
+        orderHistoryLayout.setOnClickListener(v -> {
+            navigateToOrderHistory();
+        });
+    }
+
+    private void navigateToOrderHistory() {
+        // Navigate to OrderHistoryFragment
+        OrderHistoryFragment orderHistoryFragment = new OrderHistoryFragment();
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, orderHistoryFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

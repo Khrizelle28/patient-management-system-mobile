@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/buttonBack"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:tint="#333333" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="RECEIPT"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Receipt Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Patient Name -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Patient:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/textPatientName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="(NAME)"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
+
+                    </LinearLayout>
+
+                    <!-- Amount Paid -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Amount Paid:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/textAmountPaid"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="Php 500.00"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#4CAF50"
+                            android:gravity="end" />
+
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Service(s) Title -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Service(s):"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Services List -->
+                    <LinearLayout
+                        android:id="@+id/layoutServicesList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginBottom="16dp">
+
+                        <!-- Services will be added dynamically -->
+
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Date/Time -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date/Time:"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/textDateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="March 4, 2025\n8:00 AM - 11:00 AM"
+                        android:textSize="14sp"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="16dp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Book Appointment Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonBookAppointment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Book Appointment"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2196F3"
+                app:cornerRadius="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

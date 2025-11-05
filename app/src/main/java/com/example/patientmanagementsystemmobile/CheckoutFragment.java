@@ -27,7 +27,7 @@ import retrofit2.Response;
 
 public class CheckoutFragment extends Fragment {
 
-    private TextInputEditText etDeliveryAddress, etContactNumber, etNotes;
+    private TextInputEditText etPickupName, etPhoneNumber;
     private TextView tvItemCount, tvTotalAmount;
     private MaterialButton btnPlaceOrder;
     private ProgressBar progressBar;
@@ -59,13 +59,30 @@ public class CheckoutFragment extends Fragment {
 
     private void initViews(View view) {
         btnBack = view.findViewById(R.id.btnBack);
-        etDeliveryAddress = view.findViewById(R.id.etDeliveryAddress);
-        etContactNumber = view.findViewById(R.id.etContactNumber);
-        etNotes = view.findViewById(R.id.etNotes);
+        etPickupName = view.findViewById(R.id.etDeliveryAddress);
+        etPhoneNumber = view.findViewById(R.id.etContactNumber);
         tvItemCount = view.findViewById(R.id.tvItemCount);
         tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
         btnPlaceOrder = view.findViewById(R.id.btnPlaceOrder);
         progressBar = view.findViewById(R.id.progressBar);
+
+        // Auto-fill with patient user data
+        autoFillUserData();
+    }
+
+    private void autoFillUserData() {
+        if (RetrofitClient.currentUser != null) {
+            String fullName = RetrofitClient.currentUser.getFullName();
+            String contactNo = RetrofitClient.currentUser.getContactNo();
+
+            if (fullName != null && !fullName.isEmpty()) {
+                etPickupName.setText(fullName);
+            }
+
+            if (contactNo != null && !contactNo.isEmpty()) {
+                etPhoneNumber.setText(contactNo);
+            }
+        }
     }
 
     private void loadCartData() {
@@ -86,31 +103,30 @@ public class CheckoutFragment extends Fragment {
         });
 
         btnPlaceOrder.setOnClickListener(v -> {
-            String deliveryAddress = etDeliveryAddress.getText().toString().trim();
-            String contactNumber = etContactNumber.getText().toString().trim();
-            String notes = etNotes.getText().toString().trim();
+            String pickupName = etPickupName.getText().toString().trim();
+            String phoneNumber = etPhoneNumber.getText().toString().trim();
 
-            if (deliveryAddress.isEmpty()) {
-                etDeliveryAddress.setError("Delivery address is required");
-                etDeliveryAddress.requestFocus();
+            if (pickupName.isEmpty()) {
+                etPickupName.setError("Name is required");
+                etPickupName.requestFocus();
                 return;
             }
 
-            if (contactNumber.isEmpty()) {
-                etContactNumber.setError("Contact number is required");
-                etContactNumber.requestFocus();
+            if (phoneNumber.isEmpty()) {
+                etPhoneNumber.setError("Phone number is required");
+                etPhoneNumber.requestFocus();
                 return;
             }
 
-            placeOrder(deliveryAddress, contactNumber, notes);
+            placeOrder(pickupName, phoneNumber, "");
         });
     }
 
-    private void placeOrder(String deliveryAddress, String contactNumber, String notes) {
+    private void placeOrder(String pickupName, String phoneNumber, String notes) {
         progressBar.setVisibility(View.VISIBLE);
         btnPlaceOrder.setEnabled(false);
 
-        PlaceOrderRequest request = new PlaceOrderRequest(deliveryAddress, contactNumber, notes);
+        PlaceOrderRequest request = new PlaceOrderRequest(pickupName, phoneNumber, notes);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         apiService.placeOrder(request).enqueue(new Callback<OrderResponse>() {

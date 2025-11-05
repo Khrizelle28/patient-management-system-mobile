@@ -8,7 +8,9 @@
       "Bash(cat:*)",
       "Read(//d/laragon/www/**)",
       "Bash(php artisan:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(./gradlew:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

@@ -80,6 +80,27 @@ public interface ApiService {
 
     // Order endpoints
     @Headers("Accept: application/json")
+    @GET("orders")
+    Call<com.example.patientmanagementsystemmobile.response.OrderHistoryResponse> getOrderHistory();
+
+    @Headers("Accept: application/json")
     @POST("orders/place")
     Call<OrderResponse> placeOrder(@Body PlaceOrderRequest request);
+
+    // Medication Alert endpoints
+    @Headers("Accept: application/json")
+    @GET("medication-alerts/patient/{patientId}")
+    Call<com.example.patientmanagementsystemmobile.response.MedicationAlertResponse> getPatientMedicationAlerts(@Path("patientId") String patientId);
+
+    @Headers("Accept: application/json")
+    @POST("medication-alerts")
+    Call<com.example.patientmanagementsystemmobile.response.MedicationAlertResponse> createMedicationAlert(@Body com.example.patientmanagementsystemmobile.request.MedicationAlertRequest request);
+
+    @Headers("Accept: application/json")
+    @PUT("medication-alerts/{id}")
+    Call<com.example.patientmanagementsystemmobile.response.MedicationAlertResponse> updateMedicationAlert(@Path("id") int alertId, @Body com.example.patientmanagementsystemmobile.request.MedicationAlertRequest request);
+
+    @Headers("Accept: application/json")
+    @DELETE("medication-alerts/{id}")
+    Call<com.example.patientmanagementsystemmobile.response.MedicationAlertResponse> deleteMedicationAlert(@Path("id") int alertId);
 }

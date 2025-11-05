@@ -8,7 +8,7 @@ public class Order {
     private String order_number;
     private double total_amount;
     private String status;
-    private String delivery_address;
+    private String pickup_name;
     private String contact_number;
     private String notes;
     private String created_at;
@@ -19,14 +19,14 @@ public class Order {
     }
 
     public Order(int id, int patient_user_id, String order_number, double total_amount,
-                 String status, String delivery_address, String contact_number, String notes,
+                 String status, String pickup_name, String contact_number, String notes,
                  String created_at, String updated_at, List<OrderItem> items) {
         this.id = id;
         this.patient_user_id = patient_user_id;
         this.order_number = order_number;
         this.total_amount = total_amount;
         this.status = status;
-        this.delivery_address = delivery_address;
+        this.pickup_name = pickup_name;
         this.contact_number = contact_number;
         this.notes = notes;
         this.created_at = created_at;
@@ -75,12 +75,12 @@ public class Order {
         this.status = status;
     }
 
-    public String getDelivery_address() {
-        return delivery_address;
+    public String getPickup_name() {
+        return pickup_name;
     }
 
-    public void setDelivery_address(String delivery_address) {
-        this.delivery_address = delivery_address;
+    public void setPickup_name(String pickup_name) {
+        this.pickup_name = pickup_name;
     }
 
     public String getContact_number() {

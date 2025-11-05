@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +23,8 @@ import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
 import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
+import com.example.patientmanagementsystemmobile.response.AppointmentListResponse;
+import com.example.patientmanagementsystemmobile.data.AppointmentData;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -34,6 +37,7 @@ public class AppointmentFragment extends Fragment {
 
     private CalendarView calendarView;
     private TextView selectedDateText;
+    private TextView restrictionText;
     private RecyclerView peopleRecyclerView;
     private PeopleAdapter peopleAdapter;
     private Map<String, List<Person>> scheduleData;
@@ -41,6 +45,8 @@ public class AppointmentFragment extends Fragment {
     private ApiService apiService;
 
     private User user;
+    private boolean hasUpcomingAppointmentFlag = false;
+    private String upcomingAppointmentDateStr = null;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -53,12 +59,14 @@ public class AppointmentFragment extends Fragment {
         setupRecyclerView();
         setupCalendar();
         loadScheduleData(); // Load data from API
+        checkPatientAppointmentsOnLoad(); // Check if patient has upcoming appointments
         return view;
     }
 
     private void initViews(View view) {
         calendarView = view.findViewById(R.id.calendarView);
         selectedDateText = view.findViewById(R.id.selectedDateText);
+        restrictionText = view.findViewById(R.id.restrictionText);
         peopleRecyclerView = view.findViewById(R.id.peopleRecyclerView);
         scheduleData = new HashMap<>();
     }
@@ -69,6 +77,66 @@ public class AppointmentFragment extends Fragment {
 
     private void initApiService() {
         apiService = RetrofitClient.getClient().create(ApiService.class);
+    }
+
+    private void checkPatientAppointmentsOnLoad() {
+        String patientId = RetrofitClient.currentUser.getId();
+
+        Call<AppointmentListResponse> call = apiService.getPatientAppointments(patientId);
+        call.enqueue(new Callback<AppointmentListResponse>() {
+            @Override
+            public void onResponse(Call<AppointmentListResponse> call, Response<AppointmentListResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AppointmentListResponse appointmentListResponse = response.body();
+
+                    if (appointmentListResponse.isSuccess() && appointmentListResponse.getData() != null) {
+                        List<AppointmentData> appointments = appointmentListResponse.getData();
+                        upcomingAppointmentDateStr = hasUpcomingAppointment(appointments);
+                        hasUpcomingAppointmentFlag = (upcomingAppointmentDateStr != null);
+
+                        // Update the UI after checking appointments
+                        updatePeopleList();
+                    }
+                } else {
+                    Log.e("APPOINTMENT_CHECK", "Failed to check appointments: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AppointmentListResponse> call, Throwable t) {
+                Log.e("APPOINTMENT_CHECK", "Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void refreshAppointmentStatusAndUI() {
+        String patientId = RetrofitClient.currentUser.getId();
+
+        Call<AppointmentListResponse> call = apiService.getPatientAppointments(patientId);
+        call.enqueue(new Callback<AppointmentListResponse>() {
+            @Override
+            public void onResponse(Call<AppointmentListResponse> call, Response<AppointmentListResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AppointmentListResponse appointmentListResponse = response.body();
+
+                    if (appointmentListResponse.isSuccess() && appointmentListResponse.getData() != null) {
+                        List<AppointmentData> appointments = appointmentListResponse.getData();
+                        upcomingAppointmentDateStr = hasUpcomingAppointment(appointments);
+                        hasUpcomingAppointmentFlag = (upcomingAppointmentDateStr != null);
+
+                        // Immediately update the UI to hide doctors list
+                        updatePeopleList();
+                    }
+                } else {
+                    Log.e("APPOINTMENT_REFRESH", "Failed to refresh appointments: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AppointmentListResponse> call, Throwable t) {
+                Log.e("APPOINTMENT_REFRESH", "Network error: " + t.getMessage());
+            }
+        });
     }
 
     private void loadScheduleData() {
@@ -247,23 +315,104 @@ public class AppointmentFragment extends Fragment {
     }
 
     private void showBookingDialog(Person person) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Book Appointment");
-        builder.setMessage("Would you like to book an appointment with " + person.getName() + "?");
+        // First, check if the patient has any upcoming appointments
+        checkUpcomingAppointments(person);
+    }
 
-        builder.setPositiveButton("Book Now", (dialog, which) -> {
-            // Handle booking logic here
-            bookAppointment(person);
-            Toast.makeText(getContext(), "Appointment booked with " + person.getName(), Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+    private void checkUpcomingAppointments(Person person) {
+        String patientId = RetrofitClient.currentUser.getId();
+
+        Call<AppointmentListResponse> call = apiService.getPatientAppointments(patientId);
+        call.enqueue(new Callback<AppointmentListResponse>() {
+            @Override
+            public void onResponse(Call<AppointmentListResponse> call, Response<AppointmentListResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AppointmentListResponse appointmentListResponse = response.body();
+
+                    if (appointmentListResponse.isSuccess() && appointmentListResponse.getData() != null) {
+                        List<AppointmentData> appointments = appointmentListResponse.getData();
+
+                        // Check if there's any upcoming appointment
+                        String upcomingAppointmentDate = hasUpcomingAppointment(appointments);
+
+                        if (upcomingAppointmentDate != null) {
+                            // Patient has an upcoming appointment, show restriction message
+                            showAppointmentRestrictionDialog(upcomingAppointmentDate);
+                        } else {
+                            // No upcoming appointment, proceed with booking
+                            showConfirmBookingDialog(person);
+                        }
+                    } else {
+                        // No appointments found, proceed with booking
+                        showConfirmBookingDialog(person);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to check existing appointments", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AppointmentListResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
+    }
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
+    private String hasUpcomingAppointment(List<AppointmentData> appointments) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date today = new Date();
+
+            for (AppointmentData appointment : appointments) {
+                String appointmentDateStr = appointment.getAppointment_date();
+                Date appointmentDate = dateFormat.parse(appointmentDateStr);
+
+                // Check if appointment date is today or in the future
+                if (appointmentDate != null && !appointmentDate.before(today)) {
+                    // Format the date for display
+                    SimpleDateFormat displayFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
+                    return displayFormat.format(appointmentDate);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("APPOINTMENT_CHECK", "Error checking upcoming appointments: " + e.getMessage());
+        }
+
+        return null; // No upcoming appointments
+    }
+
+    private void showAppointmentRestrictionDialog(String upcomingDate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Booking Restricted");
+        builder.setMessage("You already have an upcoming appointment on " + upcomingDate +
+                ". You can only book a new appointment after this date has passed.");
+
+        builder.setPositiveButton("OK", (dialog, which) -> {
             dialog.dismiss();
         });
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void showConfirmBookingDialog(Person person) {
+        // Navigate to Service Selection Fragment instead of booking directly
+        navigateToServiceSelection(person);
+    }
+
+    private void navigateToServiceSelection(Person person) {
+        String patientId = RetrofitClient.currentUser.getId();
+
+        ServiceSelectionFragment serviceFragment = ServiceSelectionFragment.newInstance(
+                person,
+                selectedDate,
+                patientId
+        );
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, serviceFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void bookAppointment(Person person) {
@@ -298,7 +447,8 @@ public class AppointmentFragment extends Fragment {
                     AppointmentResponse appointmentResponse = response.body();
                     if (appointmentResponse.isSuccess()) {
                         Toast.makeText(getContext(), "Appointment booked successfully!", Toast.LENGTH_LONG).show();
-                        // Optionally refresh the UI or navigate to appointments list
+                        // Immediately refresh appointment status to hide doctors list
+                        refreshAppointmentStatusAndUI();
                     } else {
                         Toast.makeText(getContext(), appointmentResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -327,13 +477,27 @@ public class AppointmentFragment extends Fragment {
     }
 
     private void updatePeopleList() {
-        List<Person> availablePeople = scheduleData.get(selectedDate);
-        if (availablePeople == null) {
-            availablePeople = new ArrayList<>();
-        }
+        // Check if patient has upcoming appointment
+        if (hasUpcomingAppointmentFlag) {
+            // Hide the doctors list
+            peopleRecyclerView.setVisibility(View.GONE);
+            // Show restriction message with the appointment date
+            restrictionText.setText("You have an upcoming appointment on " + upcomingAppointmentDateStr +
+                    ". You can book again after your appointment date has passed.");
+            restrictionText.setVisibility(View.VISIBLE);
+        } else {
+            // Show the doctors list normally
+            peopleRecyclerView.setVisibility(View.VISIBLE);
+            restrictionText.setVisibility(View.GONE);
 
-        if (peopleAdapter != null) {
-            peopleAdapter.updatePeople(availablePeople);
+            List<Person> availablePeople = scheduleData.get(selectedDate);
+            if (availablePeople == null) {
+                availablePeople = new ArrayList<>();
+            }
+
+            if (peopleAdapter != null) {
+                peopleAdapter.updatePeople(availablePeople);
+            }
         }
     }
 

@@ -107,6 +107,17 @@
                         android:padding="20dp"
                         android:visibility="gone" />
 
+                    <TextView
+                        android:id="@+id/restrictionText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="You have an upcoming appointment. You can book again after your appointment date."
+                        android:textSize="14sp"
+                        android:textColor="#E74C3C"
+                        android:gravity="center"
+                        android:padding="20dp"
+                        android:visibility="gone" />
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

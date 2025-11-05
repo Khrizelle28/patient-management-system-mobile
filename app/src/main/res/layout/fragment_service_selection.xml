@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/buttonBack"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:tint="#333333" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="SERVICES"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Book Doctor Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Book Doctor:"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="8dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:src="@drawable/ic_person"
+                        android:background="@drawable/circle_background"
+                        android:scaleType="centerCrop" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textDoctorName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kalampag"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
+
+                        <TextView
+                            android:id="@+id/textDoctorSpecialty"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="OB-GYN (Obstetrics and Gynecology)"
+                            android:textSize="12sp"
+                            android:textColor="#666666" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Date and Time -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date:"
+                        android:textSize="14sp"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/textSelectedDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="March 4, 2025"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Time"
+                        android:textSize="14sp"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/textSelectedTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8:00 AM - 11:00 AM"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Choose Service Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose Service(s)"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupServices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <RadioButton
+                    android:id="@+id/radioPregnant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Pregnant                                                    Php 500.00"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/radioNonPregnant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Non - Pregnant                                        Php 500.00"
+                    android:textSize="14sp"
+                    android:padding="12dp" />
+
+            </RadioGroup>
+
+            <!-- Pap Smear Checkbox (Optional) -->
+            <CheckBox
+                android:id="@+id/checkboxPapSmear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pap smear                                                 Php 1,500.00"
+                android:textSize="14sp"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Medical Certificate Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Do you need Medical Certificate?"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupMedCert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/radioMedCertYes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Yes                                                               Php 150.00"
+                    android:textSize="14sp"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/radioMedCertNo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No"
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:checked="true" />
+
+            </RadioGroup>
+
+            <!-- Go to Payment Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonGoToPayment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Go to Payment"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2196F3"
+                app:cornerRadius="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
