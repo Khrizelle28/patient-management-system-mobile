@@ -4,9 +4,13 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,6 +20,9 @@ import android.widget.TextView;
 import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.models.Product;
@@ -154,7 +161,7 @@ public class DoctorsFragment extends Fragment {
                             medicationList.add(new Medication(
                                     product.getId(),
                                     product.getName(),
-                                    "$" + product.getPrice(),
+                                    "₱" + product.getPrice(),
                                     product.getDescription(),
                                     "💊", // Default emoji
                                     product.getStock(),
@@ -247,7 +254,7 @@ public class DoctorsFragment extends Fragment {
 
         // Find views
         TextView textProductName = dialogView.findViewById(R.id.textProductName);
-        TextView textQuantity = dialogView.findViewById(R.id.textQuantity);
+        EditText textQuantity = dialogView.findViewById(R.id.textQuantity);
         android.widget.ImageButton btnDecrease = dialogView.findViewById(R.id.btnDecrease);
         android.widget.ImageButton btnIncrease = dialogView.findViewById(R.id.btnIncrease);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
@@ -258,6 +265,37 @@ public class DoctorsFragment extends Fragment {
         textQuantity.setText(String.valueOf(quantity[0]));
 
         android.app.AlertDialog dialog = builder.create();
+
+        // Handle manual quantity input
+        textQuantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    String input = s.toString().trim();
+                    if (!input.isEmpty()) {
+                        int newQuantity = Integer.parseInt(input);
+                        if (newQuantity > maxStock) {
+                            textQuantity.setText(String.valueOf(maxStock));
+                            textQuantity.setSelection(textQuantity.getText().length());
+                            Toast.makeText(getContext(), "Maximum stock: " + maxStock, Toast.LENGTH_SHORT).show();
+                        } else if (newQuantity > 0) {
+                            quantity[0] = newQuantity;
+                        } else {
+                            textQuantity.setText("1");
+                            textQuantity.setSelection(textQuantity.getText().length());
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid input
+                }
+            }
+        });
 
         // Decrease quantity
         btnDecrease.setOnClickListener(v -> {
@@ -381,12 +419,11 @@ public class DoctorsFragment extends Fragment {
 
         class ViewHolder extends RecyclerView.ViewHolder {
             private CardView medicationCard;
-            private TextView medicationImage;
+            private ImageView medicationImage;
             private TextView medicationName;
             private TextView medicationPrice;
             private TextView medicationDescription;
             private TextView medicationStock;
-            private Button readMoreButton;
             private Button addToCartButton;
 
             public ViewHolder(View itemView) {
@@ -397,7 +434,6 @@ public class DoctorsFragment extends Fragment {
                 medicationPrice = itemView.findViewById(R.id.medicationPrice);
                 medicationDescription = itemView.findViewById(R.id.medicationDescription);
                 medicationStock = itemView.findViewById(R.id.medicationStock);
-                readMoreButton = itemView.findViewById(R.id.readMoreButton);
                 addToCartButton = itemView.findViewById(R.id.addToCartButton);
             }
 
@@ -405,8 +441,23 @@ public class DoctorsFragment extends Fragment {
                 medicationName.setText(medication.getName());
                 medicationPrice.setText(medication.getPrice());
                 medicationDescription.setText(medication.getDescription());
-                medicationImage.setText(medication.getEmoji());
                 medicationStock.setText("Stock: " + medication.getStock());
+
+                // Load product image
+                if (medication.getImage() != null && !medication.getImage().isEmpty()) {
+                    String imageUrl = "http://10.0.2.2:8000" + medication.getImage();
+                    android.util.Log.d("DoctorsFragment", "Loading image: " + imageUrl);
+
+                    Glide.with(itemView.getContext())
+                            .load(imageUrl)
+                            .placeholder(android.R.drawable.ic_menu_gallery)
+                            .error(android.R.drawable.ic_menu_gallery)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(medicationImage);
+                } else {
+                    android.util.Log.d("DoctorsFragment", "No image for: " + medication.getName());
+                    medicationImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
 
                 // Disable "Add to Cart" button if out of stock
                 if (medication.getStock() <= 0) {
@@ -419,13 +470,6 @@ public class DoctorsFragment extends Fragment {
                     addToCartButton.setEnabled(true);
                     addToCartButton.setText("Add to Cart");
                 }
-
-                readMoreButton.setOnClickListener(v -> {
-                    Toast.makeText(itemView.getContext(),
-                            "More info about " + medication.getName(),
-                            Toast.LENGTH_SHORT).show();
-                    // TODO: Navigate to medication details
-                });
 
                 addToCartButton.setOnClickListener(v -> {
                     // Add to cart with stock info

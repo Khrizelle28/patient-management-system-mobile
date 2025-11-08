@@ -23,6 +23,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -40,6 +41,10 @@ public interface ApiService {
     @Headers("Accept: application/json")
     @GET("doctor-schedule")
     Call<Map<String, Object>> getDoctorSchedule();
+
+    @Headers("Accept: application/json")
+    @GET("doctor-schedule")
+    Call<Map<String, Object>> getDoctorSchedule(@Query("date") String date);
 
     @Headers("Accept: application/json")
     @POST("appointments")

@@ -10,7 +10,14 @@
       "Bash(php artisan:*)",
       "Bash(curl:*)",
       "Bash(./gradlew:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Read(//c/laragon/www//**)",
+      "Bash(dir /s /b 'C:\\Users\\Khrizelle Sablan\\AndroidStudioProjects\\patient-management-system-mobile\\app\\src\\main\\*.kt' 2)",
+      "Bash(nul)",
+      "Bash(adb logcat:*)",
+      "Bash(dir /s /b artisan 2)",
+      "Bash(adb devices:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

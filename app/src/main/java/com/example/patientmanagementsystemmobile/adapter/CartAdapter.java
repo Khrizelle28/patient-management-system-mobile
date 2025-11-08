@@ -1,10 +1,13 @@
 package com.example.patientmanagementsystemmobile.adapter;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +15,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.CartItem;
 
@@ -44,19 +49,67 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
         CartItem item = cartItems.get(position);
 
+        // Remove existing TextWatcher to avoid multiple listeners
+        if (holder.quantityWatcher != null) {
+            holder.textQuantity.removeTextChangedListener(holder.quantityWatcher);
+        }
+
         if (item.getProduct() != null) {
             holder.textProductName.setText(item.getProduct().getName());
-            holder.textProductPrice.setText("$" + String.format("%.2f", Double.parseDouble(item.getPrice())));
-            holder.textQuantity.setText("x" + String.valueOf(item.getQuantity()));
+            holder.textProductPrice.setText("₱" + String.format("%.2f", Double.parseDouble(item.getPrice())));
+            holder.textQuantity.setText(String.valueOf(item.getQuantity()));
 
             // Set description if available
             if (item.getProduct().getDescription() != null && !item.getProduct().getDescription().isEmpty()) {
                 holder.textProductDescription.setText(item.getProduct().getDescription());
             }
 
-            // Optional: Load product image if you have image loading library
-            // Glide.with(context).load(item.getProduct().getImage()).into(holder.imageProduct);
+            // Load product image
+            if (item.getProduct().getImage() != null && !item.getProduct().getImage().isEmpty()) {
+                String imageUrl = "http://10.0.2.2:8000" + item.getProduct().getImage();
+                Glide.with(context)
+                        .load(imageUrl)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_gallery)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(holder.imageProduct);
+            } else {
+                holder.imageProduct.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
         }
+
+        // Handle manual quantity input
+        holder.quantityWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    String quantityStr = s.toString().trim();
+                    if (!quantityStr.isEmpty()) {
+                        int newQuantity = Integer.parseInt(quantityStr);
+                        int stock = item.getProduct() != null ? item.getProduct().getStock() : Integer.MAX_VALUE;
+
+                        if (newQuantity > 0 && newQuantity <= stock) {
+                            if (newQuantity != item.getQuantity()) {
+                                listener.onQuantityChanged(item, newQuantity);
+                            }
+                        } else if (newQuantity > stock) {
+                            holder.textQuantity.setText(String.valueOf(stock));
+                        } else if (newQuantity <= 0) {
+                            holder.textQuantity.setText("1");
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore invalid input
+                }
+            }
+        };
+        holder.textQuantity.addTextChangedListener(holder.quantityWatcher);
 
         // Decrease quantity
         holder.btnDecrease.setOnClickListener(v -> {
@@ -96,10 +149,11 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         TextView textProductName;
         TextView textProductDescription;
         TextView textProductPrice;
-        TextView textQuantity;
+        EditText textQuantity;
         ImageButton btnDecrease;
         ImageButton btnIncrease;
         ImageButton btnRemove;
+        TextWatcher quantityWatcher;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);

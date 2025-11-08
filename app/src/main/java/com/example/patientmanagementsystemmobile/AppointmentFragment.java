@@ -140,10 +140,17 @@ public class AppointmentFragment extends Fragment {
     }
 
     private void loadScheduleData() {
+        // Load schedule with the currently selected date
+        loadScheduleDataForDate(selectedDate);
+    }
+
+    private void loadScheduleDataForDate(String date) {
         // Show loading state if needed
         // progressBar.setVisibility(View.VISIBLE);
 
-        Call<Map<String, Object>> call = apiService.getDoctorSchedule();
+        Log.d("AppointmentFragment", "Loading schedule for date: " + date);
+
+        Call<Map<String, Object>> call = apiService.getDoctorSchedule(date);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -292,8 +299,12 @@ public class AppointmentFragment extends Fragment {
                 selectedCal.set(year, month, dayOfMonth);
                 selectedDate = dateFormat.format(selectedCal.getTime());
 
+                Log.d("AppointmentFragment", "Calendar date changed to: " + selectedDate);
+
                 updateSelectedDateDisplay();
-                updatePeopleList();
+
+                // Reload schedule data with the new selected date to check doctor availability
+                loadScheduleDataForDate(selectedDate);
             }
         });
     }

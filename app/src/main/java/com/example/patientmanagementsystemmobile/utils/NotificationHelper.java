@@ -49,6 +49,7 @@ public class NotificationHelper {
         // Intent to open app when notification is clicked
         Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("open_fragment", "rx_alert");
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,

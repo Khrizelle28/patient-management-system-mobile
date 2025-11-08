@@ -113,10 +113,22 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
             }
         });
 
+        // Check permissions
+        checkAndRequestExactAlarmPermission();
+
         // Load medication alerts from API
         loadMedicationAlertsFromAPI();
 
         return view;
+    }
+
+    private void checkAndRequestExactAlarmPermission() {
+        if (!AlarmScheduler.canScheduleExactAlarms(requireContext())) {
+            Toast.makeText(getContext(),
+                "Please grant exact alarm permission for medication reminders to work properly",
+                Toast.LENGTH_LONG).show();
+            AlarmScheduler.requestExactAlarmPermission(requireContext());
+        }
     }
 
     private void loadMedicationAlertsFromAPI() {

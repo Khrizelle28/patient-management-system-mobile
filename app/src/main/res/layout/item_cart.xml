@@ -101,7 +101,7 @@
                         android:id="@+id/textProductPrice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$1250"
+                        android:text="₱1250"
                         android:textColor="@android:color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -139,18 +139,22 @@
                             android:layout_width="32dp"
                             android:layout_height="32dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:src="@android:drawable/ic_delete"
+                            android:src="@drawable/ic_minus"
                             android:contentDescription="Decrease quantity" />
 
-                        <TextView
+                        <EditText
                             android:id="@+id/textQuantity"
-                            android:layout_width="40dp"
+                            android:layout_width="50dp"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="x1"
+                            android:text="1"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@android:color/black" />
+                            android:textColor="@android:color/black"
+                            android:inputType="number"
+                            android:background="@android:color/transparent"
+                            android:maxLength="3"
+                            android:selectAllOnFocus="true" />
 
                         <ImageButton
                             android:id="@+id/btnIncrease"

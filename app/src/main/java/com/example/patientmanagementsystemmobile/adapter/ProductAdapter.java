@@ -11,6 +11,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.Product;
 
@@ -44,7 +53,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Product product = products.get(position);
 
         holder.textProductName.setText(product.getName());
-        holder.textProductPrice.setText("$" + product.getPrice());
+        holder.textProductPrice.setText("₱" + product.getPrice());
         holder.textProductStock.setText("Stock: " + product.getStock());
 
         if (product.getDescription() != null && !product.getDescription().isEmpty()) {
@@ -63,8 +72,35 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.btnAddToCart.setText("Add to Cart");
         }
 
-        // Optional: Load product image if you have image loading library
-        // Glide.with(context).load(product.getImage()).into(holder.imageProduct);
+        // Load product image
+        if (product.getImage() != null && !product.getImage().isEmpty()) {
+            String imageUrl = "http://10.0.2.2:8000" + product.getImage();
+            Log.d("ProductAdapter", "Loading image for " + product.getName() + ": " + imageUrl);
+
+            Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            Log.e("ProductAdapter", "Failed to load image: " + imageUrl, e);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            Log.d("ProductAdapter", "Successfully loaded image: " + imageUrl);
+                            return false;
+                        }
+                    })
+                    .into(holder.imageProduct);
+        } else {
+            Log.d("ProductAdapter", "No image for product: " + product.getName());
+            // Set placeholder if no image
+            holder.imageProduct.setImageResource(android.R.drawable.ic_menu_gallery);
+        }
 
         holder.btnAddToCart.setOnClickListener(v -> {
             if (listener != null) {

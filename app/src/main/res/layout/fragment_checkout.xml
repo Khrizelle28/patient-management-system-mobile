@@ -182,7 +182,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     app:boxBackgroundMode="outline">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -190,6 +190,30 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remarks/Notes (Optional)"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="4dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="outline">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRemarks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter any special instructions or notes"
+                        android:inputType="textMultiLine"
+                        android:minLines="3"
+                        android:gravity="top|start" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -207,6 +231,16 @@
                     android:text="Kindly bring a valid ID and a prescription or authorization when the representative will pick up the medicines. Please charge the same to the authorized person and ensure they also bring their valid ID. You may not complete this transaction without this transaction."
                     android:textSize="12sp"
                     android:textColor="#9E9E9E"
+                    android:lineSpacingExtra="2dp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="You can pick up the products after 30 mins of your order."
+                    android:textSize="12sp"
+                    android:textColor="#00BCD4"
+                    android:textStyle="bold"
                     android:lineSpacingExtra="2dp"
                     android:layout_marginBottom="16dp" />
             </LinearLayout>

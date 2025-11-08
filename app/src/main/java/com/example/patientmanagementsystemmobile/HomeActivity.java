@@ -31,7 +31,15 @@ public class HomeActivity extends AppCompatActivity {
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        replaceFragment(new HomeFragment());
+
+        // Check if we need to open a specific fragment (e.g., from notification)
+        String openFragment = getIntent().getStringExtra("open_fragment");
+        if ("rx_alert".equals(openFragment)) {
+            replaceFragment(new RxAlertFragment());
+            binding.bottomNavigationView.setSelectedItemId(R.id.rxalert);
+        } else {
+            replaceFragment(new HomeFragment());
+        }
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();

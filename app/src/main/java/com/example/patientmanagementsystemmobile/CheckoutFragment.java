@@ -27,7 +27,7 @@ import retrofit2.Response;
 
 public class CheckoutFragment extends Fragment {
 
-    private TextInputEditText etPickupName, etPhoneNumber;
+    private TextInputEditText etPickupName, etPhoneNumber, etRemarks;
     private TextView tvItemCount, tvTotalAmount;
     private MaterialButton btnPlaceOrder;
     private ProgressBar progressBar;
@@ -61,6 +61,7 @@ public class CheckoutFragment extends Fragment {
         btnBack = view.findViewById(R.id.btnBack);
         etPickupName = view.findViewById(R.id.etDeliveryAddress);
         etPhoneNumber = view.findViewById(R.id.etContactNumber);
+        etRemarks = view.findViewById(R.id.etRemarks);
         tvItemCount = view.findViewById(R.id.tvItemCount);
         tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
         btnPlaceOrder = view.findViewById(R.id.btnPlaceOrder);
@@ -105,6 +106,7 @@ public class CheckoutFragment extends Fragment {
         btnPlaceOrder.setOnClickListener(v -> {
             String pickupName = etPickupName.getText().toString().trim();
             String phoneNumber = etPhoneNumber.getText().toString().trim();
+            String remarks = etRemarks.getText().toString().trim();
 
             if (pickupName.isEmpty()) {
                 etPickupName.setError("Name is required");
@@ -118,7 +120,8 @@ public class CheckoutFragment extends Fragment {
                 return;
             }
 
-            placeOrder(pickupName, phoneNumber, "");
+            // Only send user's remarks to notes, not the pickup time message
+            placeOrder(pickupName, phoneNumber, remarks);
         });
     }
 

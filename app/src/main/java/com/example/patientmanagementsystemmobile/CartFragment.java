@@ -135,11 +135,11 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemList
     private void updateTotals() {
         try {
             double total = currentTotal != null ? Double.parseDouble(currentTotal) : 0.0;
-            textTotal.setText("$" + String.format("%.2f", total));
-            textTotalCheckout.setText("$" + String.format("%.2f", total));
+            textTotal.setText("₱" + String.format("%.2f", total));
+            textTotalCheckout.setText("₱" + String.format("%.2f", total));
         } catch (NumberFormatException e) {
-            textTotal.setText("$0.00");
-            textTotalCheckout.setText("$0.00");
+            textTotal.setText("₱0.00");
+            textTotalCheckout.setText("₱0.00");
         }
     }
 
