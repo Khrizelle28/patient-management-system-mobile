@@ -5,11 +5,14 @@ import com.example.patientmanagementsystemmobile.models.AuthResponse;
 import com.example.patientmanagementsystemmobile.models.User;
 import com.example.patientmanagementsystemmobile.request.AddToCartRequest;
 import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
+import com.example.patientmanagementsystemmobile.request.CreatePaymentRequest;
+import com.example.patientmanagementsystemmobile.request.ExecutePaymentRequest;
 import com.example.patientmanagementsystemmobile.request.PlaceOrderRequest;
 import com.example.patientmanagementsystemmobile.request.UpdateCartRequest;
 import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
 import com.example.patientmanagementsystemmobile.response.CartResponse;
 import com.example.patientmanagementsystemmobile.response.OrderResponse;
+import com.example.patientmanagementsystemmobile.response.PaymentResponse;
 
 import java.util.Map;
 
@@ -108,4 +111,13 @@ public interface ApiService {
     @Headers("Accept: application/json")
     @DELETE("medication-alerts/{id}")
     Call<com.example.patientmanagementsystemmobile.response.MedicationAlertResponse> deleteMedicationAlert(@Path("id") int alertId);
+
+    // Payment endpoints
+    @Headers("Accept: application/json")
+    @POST("payment/create")
+    Call<PaymentResponse> createPayment(@Body CreatePaymentRequest request);
+
+    @Headers("Accept: application/json")
+    @POST("payment/execute")
+    Call<PaymentResponse> executePayment(@Body ExecutePaymentRequest request);
 }
