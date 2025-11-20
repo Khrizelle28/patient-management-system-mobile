@@ -38,7 +38,7 @@ public class ServiceSelectionFragment extends Fragment {
     private TextView textSelectedTime;
     private RadioGroup radioGroupServices;
     private CheckBox checkboxPapSmear;
-    private RadioGroup radioGroupMedCert;
+    private CheckBox checkboxMedCert;
     private MaterialButton buttonGoToPayment;
 
     public static ServiceSelectionFragment newInstance(Person doctor, String date, String patientId) {
@@ -84,7 +84,7 @@ public class ServiceSelectionFragment extends Fragment {
         textSelectedTime = view.findViewById(R.id.textSelectedTime);
         radioGroupServices = view.findViewById(R.id.radioGroupServices);
         checkboxPapSmear = view.findViewById(R.id.checkboxPapSmear);
-        radioGroupMedCert = view.findViewById(R.id.radioGroupMedCert);
+        checkboxMedCert = view.findViewById(R.id.checkboxMedCert);
         buttonGoToPayment = view.findViewById(R.id.buttonGoToPayment);
     }
 
@@ -126,13 +126,13 @@ public class ServiceSelectionFragment extends Fragment {
         String selectedService = getSelectedService();
         double servicePrice = getServicePrice();
 
-        // Check if Pap smear is selected
+        // Check if Pap smear is selected (payment made at clinic, so price is 0 in app)
         boolean hasPapSmear = checkboxPapSmear.isChecked();
-        double papSmearPrice = hasPapSmear ? 1500.0 : 0.0;
+        double papSmearPrice = 0.0; // Payment made at clinic
 
-        // Get medical certificate option
-        boolean needsMedCert = ((RadioButton) getView().findViewById(R.id.radioMedCertYes)).isChecked();
-        double medCertPrice = needsMedCert ? 150.0 : 0.0;
+        // Get medical certificate option (payment made at clinic, so price is 0 in app)
+        boolean needsMedCert = checkboxMedCert.isChecked();
+        double medCertPrice = 0.0; // Payment made at clinic
 
         // Navigate to ReceiptFragment
         ReceiptFragment receiptFragment = ReceiptFragment.newInstance(

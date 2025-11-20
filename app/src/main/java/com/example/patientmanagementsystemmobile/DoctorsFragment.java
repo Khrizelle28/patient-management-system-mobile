@@ -58,6 +58,7 @@ public class DoctorsFragment extends Fragment {
     private CardView consultCard;
     private Button seeAllButton;
     private TextView cartIcon;
+    private TextView textGreeting;
     private CartRepository cartRepository;
 
     public DoctorsFragment() {
@@ -115,6 +116,13 @@ public class DoctorsFragment extends Fragment {
         seeAllButton = view.findViewById(R.id.seeAllButton);
         medicationRecyclerView = view.findViewById(R.id.medicationRecyclerView);
         cartIcon = view.findViewById(R.id.cartIcon);
+        textGreeting = view.findViewById(R.id.textGreeting);
+
+        // Set patient's name in greeting
+        if (RetrofitClient.currentUser != null) {
+            String fullName = RetrofitClient.currentUser.getFullName();
+            textGreeting.setText("Hello " + fullName + "!");
+        }
 
         // Initialize cart repository
         ApiService apiService = RetrofitClient.getUserApiService();

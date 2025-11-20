@@ -375,6 +375,12 @@ public class AppointmentFragment extends Fragment {
             Date today = new Date();
 
             for (AppointmentData appointment : appointments) {
+                // Only check appointments that are scheduled (payment completed)
+                // Ignore pending appointments (not paid)
+                if (!"scheduled".equalsIgnoreCase(appointment.getStatus())) {
+                    continue; // Skip pending/cancelled appointments
+                }
+
                 String appointmentDateStr = appointment.getAppointment_date();
                 Date appointmentDate = dateFormat.parse(appointmentDateStr);
 

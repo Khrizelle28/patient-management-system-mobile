@@ -116,6 +116,13 @@ public class HomeFragment extends Fragment {
         for (AppointmentData data : appointmentDataList) {
             String status = data.getStatus();
 
+            // Only show appointments that are scheduled (payment completed)
+            // Skip pending appointments (payment not completed)
+            if (!"scheduled".equalsIgnoreCase(status) &&
+                !"completed".equalsIgnoreCase(status)) {
+                continue; // Skip pending/cancelled appointments
+            }
+
             // Format the doctor name and specialty
             Log.d("Doctor", "doctor list for: " + data.getAppointment_time());
             String doctorName = "Dr. " + (data.getDoctor() != null ? data.getDoctor().getName() : "Unknown");

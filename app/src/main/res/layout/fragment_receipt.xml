@@ -42,7 +42,17 @@
                     android:text="RECEIPT"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#333333" />
+                    android:textColor="#333333"
+                    android:gravity="center" />
+
+                <!-- PayPal logo - add paypal_logo.png to drawable folder -->
+                <ImageView
+                    android:id="@+id/imagePayPal"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@android:drawable/ic_dialog_info"
+                    android:contentDescription="Payment Method"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -161,38 +171,48 @@
                         android:layout_marginBottom="16dp" />
 
                     <!-- Date/Time -->
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Date/Time:"
-                        android:textSize="14sp"
-                        android:textColor="#666666"
-                        android:layout_marginBottom="4dp" />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:id="@+id/textDateTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="March 4, 2025\n8:00 AM - 11:00 AM"
-                        android:textSize="14sp"
-                        android:textColor="#333333"
-                        android:layout_marginBottom="16dp"
-                        android:layout_marginStart="16dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Date/Time:"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/textDateTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="March 4, 2025\n8:00 AM - 11:00 AM"
+                            android:textSize="14sp"
+                            android:textColor="#333333"
+                            android:gravity="end"
+                            android:layout_marginStart="8dp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Book Appointment Button -->
+            <!-- Pay with PayPal Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonBookAppointment"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Book Appointment"
+                android:text="Pay with PayPal"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#2196F3"
-                app:cornerRadius="8dp" />
+                android:backgroundTint="#0070BA"
+                app:cornerRadius="8dp"
+                app:icon="@android:drawable/ic_secure"
+                app:iconGravity="textStart" />
 
         </LinearLayout>
 

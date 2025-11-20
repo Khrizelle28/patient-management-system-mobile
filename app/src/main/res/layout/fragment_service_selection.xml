@@ -174,11 +174,11 @@
 
             </LinearLayout>
 
-            <!-- Choose Service Section -->
+            <!-- Patient Type Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Choose Service(s)"
+                android:text="Patient Type:"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:layout_marginBottom="8dp" />
@@ -189,68 +189,131 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp">
 
-                <RadioButton
-                    android:id="@+id/radioPregnant"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Pregnant                                                    Php 500.00"
-                    android:textSize="14sp"
-                    android:padding="12dp"
-                    android:checked="true" />
+                    android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/radioNonPregnant"
+                    <RadioButton
+                        android:id="@+id/radioPregnant"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Pregnant"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:checked="true" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Php 500.00"
+                        android:textSize="14sp"
+                        android:textColor="#333333"
+                        android:layout_gravity="center_vertical"
+                        android:paddingEnd="12dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Non - Pregnant                                        Php 500.00"
-                    android:textSize="14sp"
-                    android:padding="12dp" />
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radioNonPregnant"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Non - Pregnant"
+                        android:textSize="14sp"
+                        android:padding="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Php 500.00"
+                        android:textSize="14sp"
+                        android:textColor="#333333"
+                        android:layout_gravity="center_vertical"
+                        android:paddingEnd="12dp" />
+
+                </LinearLayout>
 
             </RadioGroup>
 
-            <!-- Pap Smear Checkbox (Optional) -->
-            <CheckBox
-                android:id="@+id/checkboxPapSmear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pap smear                                                 Php 1,500.00"
-                android:textSize="14sp"
-                android:padding="12dp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Medical Certificate Section -->
+            <!-- Other Services Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Do you need Medical Certificate?"
+                android:text="Other Services"
                 android:textSize="14sp"
                 android:textColor="#666666"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp" />
 
-            <RadioGroup
-                android:id="@+id/radioGroupMedCert"
+            <!-- Pap Smear Checkbox (Optional) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
+                android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/radioMedCertYes"
-                    android:layout_width="match_parent"
+                <CheckBox
+                    android:id="@+id/checkboxPapSmear"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Yes                                                               Php 150.00"
+                    android:layout_weight="1"
+                    android:text="Pap smear"
                     android:textSize="14sp"
                     android:padding="12dp" />
 
-                <RadioButton
-                    android:id="@+id/radioMedCertNo"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No"
+                    android:text="Php 1,500.00"
                     android:textSize="14sp"
-                    android:padding="12dp"
-                    android:checked="true" />
+                    android:textColor="#333333"
+                    android:layout_gravity="center_vertical"
+                    android:paddingEnd="12dp" />
 
-            </RadioGroup>
+            </LinearLayout>
+
+            <!-- Medical Certificate Checkbox -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <CheckBox
+                    android:id="@+id/checkboxMedCert"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Medical Certificate"
+                    android:textSize="14sp"
+                    android:padding="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Php 150.00"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:layout_gravity="center_vertical"
+                    android:paddingEnd="12dp" />
+
+            </LinearLayout>
+
+            <!-- Note Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note: The doctor will determine if the patient really needs to avail medical certificate or undergo a Pap smear payment will be made at the clinic"
+                android:textSize="12sp"
+                android:textColor="#888888"
+                android:textStyle="italic"
+                android:layout_marginBottom="24dp" />
 
             <!-- Go to Payment Button -->
             <com.google.android.material.button.MaterialButton

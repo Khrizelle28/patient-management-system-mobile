@@ -1,23 +1,29 @@
 package com.example.patientmanagementsystemmobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.example.patientmanagementsystemmobile.api.ApiService;
 import com.example.patientmanagementsystemmobile.models.Person;
 import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 import com.example.patientmanagementsystemmobile.request.AppointmentRequest;
+import com.example.patientmanagementsystemmobile.request.CreatePaymentRequest;
+import com.example.patientmanagementsystemmobile.request.ExecutePaymentRequest;
 import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
+import com.example.patientmanagementsystemmobile.response.PaymentResponse;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -28,6 +34,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ReceiptFragment extends Fragment {
+
+    private static final int REQUEST_CODE_PAYMENT = 1001;
 
     private static final String ARG_DOCTOR = "doctor";
     private static final String ARG_DATE = "date";
@@ -54,10 +62,11 @@ public class ReceiptFragment extends Fragment {
     private TextView textAmountPaid;
     private LinearLayout layoutServicesList;
     private TextView textDateTime;
-    private TextView textEmail;
     private MaterialButton buttonBookAppointment;
 
     private ApiService apiService;
+    private String currentPaymentId;
+    private int currentAppointmentId;
 
     public static ReceiptFragment newInstance(Person doctor, String date, String patientId,
                                               String service, double servicePrice,
@@ -126,17 +135,18 @@ public class ReceiptFragment extends Fragment {
             textPatientName.setText(RetrofitClient.currentUser.getFullName());
         }
 
-        // Total amount
-        double totalAmount = servicePrice + papSmearPrice + medCertPrice;
-        textAmountPaid.setText(String.format(Locale.getDefault(), "Php %.2f", totalAmount));
+        // Amount Paid - only base service price (other services paid at clinic)
+        textAmountPaid.setText(String.format(Locale.getDefault(), "Php %.2f", servicePrice));
 
-        // Services list
-        addServiceToList(service, servicePrice);
+        // Services list - add base service
+        addServiceToList(service, servicePrice, false);
+
+        // Add other services (shown but not included in payment)
         if (hasPapSmear) {
-            addServiceToList("Pap smear", papSmearPrice);
+            addServiceToList("Pap smear", 1500.0, true);
         }
         if (needsMedCert) {
-            addServiceToList("Medical Certificate", medCertPrice);
+            addServiceToList("Medical Certificate", 150.0, true);
         }
 
         // Date/Time
@@ -152,18 +162,27 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-    private void addServiceToList(String serviceName, double price) {
+    private void addServiceToList(String serviceName, double price, boolean isOtherService) {
         LinearLayout serviceLayout = new LinearLayout(getContext());
         serviceLayout.setOrientation(LinearLayout.HORIZONTAL);
-        serviceLayout.setLayoutParams(new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
+        );
+        layoutParams.setMargins(0, 0, 0, 8);
+        serviceLayout.setLayoutParams(layoutParams);
 
         TextView serviceNameText = new TextView(getContext());
         serviceNameText.setText(serviceName);
         serviceNameText.setTextSize(14);
-        serviceNameText.setTextColor(getResources().getColor(android.R.color.black));
+
+        // Gray out "other services" that are paid at clinic
+        if (isOtherService) {
+            serviceNameText.setTextColor(getResources().getColor(android.R.color.darker_gray));
+        } else {
+            serviceNameText.setTextColor(getResources().getColor(android.R.color.black));
+        }
+
         LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -174,7 +193,13 @@ public class ReceiptFragment extends Fragment {
         TextView servicePriceText = new TextView(getContext());
         servicePriceText.setText(String.format(Locale.getDefault(), "Php %.2f", price));
         servicePriceText.setTextSize(14);
-        servicePriceText.setTextColor(getResources().getColor(android.R.color.black));
+
+        // Gray out "other services" prices
+        if (isOtherService) {
+            servicePriceText.setTextColor(getResources().getColor(android.R.color.darker_gray));
+        } else {
+            servicePriceText.setTextColor(getResources().getColor(android.R.color.black));
+        }
 
         serviceLayout.addView(serviceNameText);
         serviceLayout.addView(servicePriceText);
@@ -195,20 +220,31 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void bookAppointment() {
+        // Disable button and show loading state
+        buttonBookAppointment.setEnabled(false);
+        buttonBookAppointment.setText("Processing...");
+
+        // If appointment already created (e.g., payment was cancelled), retry payment
+        if (currentAppointmentId > 0) {
+            initiatePayment(currentAppointmentId, servicePrice);
+            return;
+        }
+
+        // Create appointment first, then initiate payment
         // Create appointment notes with service details
         StringBuilder notes = new StringBuilder();
         notes.append("Service: ").append(service);
         if (hasPapSmear) {
-            notes.append(", Pap smear: Yes");
+            notes.append(", Pap smear: Yes (paid at clinic)");
         }
         if (needsMedCert) {
-            notes.append(", Medical Certificate: Yes");
+            notes.append(", Medical Certificate: Yes (paid at clinic)");
         }
 
-        // Calculate total amount
-        double totalAmount = servicePrice + papSmearPrice + medCertPrice;
+        // Total amount - only base service price (other services paid at clinic)
+        double totalAmount = servicePrice;
 
-        // Use the new constructor with all service details
+        // Create appointment request
         AppointmentRequest request = new AppointmentRequest(
                 patientId,
                 doctor.getId(),
@@ -224,30 +260,136 @@ public class ReceiptFragment extends Fragment {
                 totalAmount
         );
 
-        Call<AppointmentResponse> call = apiService.createAppointment(request);
-        call.enqueue(new Callback<AppointmentResponse>() {
+        // First, create the appointment
+        apiService.createAppointment(request).enqueue(new Callback<AppointmentResponse>() {
             @Override
             public void onResponse(Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     AppointmentResponse appointmentResponse = response.body();
-                    if (appointmentResponse.isSuccess()) {
-                        Toast.makeText(getContext(), "Appointment booked successfully!", Toast.LENGTH_LONG).show();
+                    currentAppointmentId = appointmentResponse.getData().getId();
 
-                        // Navigate back to appointment fragment
-                        navigateBackToAppointments();
-                    } else {
-                        Toast.makeText(getContext(), appointmentResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                    // Now create payment for this appointment
+                    initiatePayment(currentAppointmentId, totalAmount);
                 } else {
-                    Toast.makeText(getContext(), "Failed to book appointment", Toast.LENGTH_SHORT).show();
+                    resetButton();
+                    String errorMsg = response.body() != null ? response.body().getMessage() : "Failed to create appointment";
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<AppointmentResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                resetButton();
+                Toast.makeText(getContext(),
+                    "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void resetButton() {
+        buttonBookAppointment.setEnabled(true);
+        buttonBookAppointment.setText("Pay with PayPal");
+    }
+
+    private void initiatePayment(int appointmentId, double amount) {
+        CreatePaymentRequest paymentRequest = new CreatePaymentRequest(
+            "appointment",
+            appointmentId,
+            amount,
+            "PHP",
+            "Appointment Payment - " + service
+        );
+
+        apiService.createPayment(paymentRequest).enqueue(new Callback<PaymentResponse>() {
+            @Override
+            public void onResponse(Call<PaymentResponse> call, Response<PaymentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    PaymentResponse paymentResponse = response.body();
+                    String approvalUrl = paymentResponse.getData().getApproval_url();
+                    currentPaymentId = paymentResponse.getData().getPayment_id();
+
+                    // Launch PayPal WebView
+                    Intent intent = new Intent(getContext(), PayPalWebViewActivity.class);
+                    intent.putExtra(PayPalWebViewActivity.EXTRA_URL, approvalUrl);
+                    intent.putExtra(PayPalWebViewActivity.EXTRA_PAYMENT_TYPE, "appointment");
+                    intent.putExtra(PayPalWebViewActivity.EXTRA_ITEM_ID, appointmentId);
+                    intent.putExtra(PayPalWebViewActivity.EXTRA_PAYMENT_ID, currentPaymentId);
+                    startActivityForResult(intent, REQUEST_CODE_PAYMENT);
+                } else {
+                    resetButton();
+                    String errorMsg = response.body() != null ? response.body().getMessage() : "Failed to create payment";
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PaymentResponse> call, Throwable t) {
+                resetButton();
+                Toast.makeText(getContext(),
+                    "Payment initialization failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_PAYMENT) {
+            if (resultCode == getActivity().RESULT_OK && data != null) {
+                String payerId = data.getStringExtra("payer_id");
+                String paymentId = data.getStringExtra("payment_id");
+                String paymentType = data.getStringExtra("payment_type");
+
+                if (payerId != null && paymentId != null) {
+                    executePaymentAndCreateAppointment(paymentId, payerId, paymentType);
+                } else {
+                    resetButton();
+                    Toast.makeText(getContext(), "Payment cancelled. You can try again.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                resetButton();
+                Toast.makeText(getContext(), "Payment cancelled. You can try again.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void executePaymentAndCreateAppointment(String paymentId, String payerId, String paymentType) {
+        ExecutePaymentRequest executeRequest = new ExecutePaymentRequest(paymentId, payerId, paymentType);
+
+        apiService.executePayment(executeRequest).enqueue(new Callback<PaymentResponse>() {
+            @Override
+            public void onResponse(Call<PaymentResponse> call, Response<PaymentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    // Payment successful, appointment already created and updated by backend
+                    showPaymentSuccessDialog();
+                } else {
+                    resetButton();
+                    String errorMsg = response.body() != null ? response.body().getMessage() : "Payment execution failed";
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PaymentResponse> call, Throwable t) {
+                resetButton();
+                Toast.makeText(getContext(),
+                    "Payment execution failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void showPaymentSuccessDialog() {
+        if (getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Payment Successful!");
+        builder.setMessage("Your payment has been completed successfully.\n\nYour appointment has been booked.");
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            navigateBackToAppointments();
+        });
+        builder.setCancelable(false);
+        builder.show();
     }
 
     private void navigateBackToAppointments() {
