@@ -252,7 +252,7 @@ public class ReceiptFragment extends Fragment {
                 doctor.getSchedule(),
                 notes.toString(),
                 service,
-                servicePrice,
+                10.0,
                 hasPapSmear,
                 hasPapSmear ? papSmearPrice : 0.0,
                 needsMedCert,
@@ -295,7 +295,7 @@ public class ReceiptFragment extends Fragment {
         CreatePaymentRequest paymentRequest = new CreatePaymentRequest(
             "appointment",
             appointmentId,
-            amount,
+            10,
             "PHP",
             "Appointment Payment - " + service
         );

@@ -48,7 +48,7 @@ public class CheckoutFragment extends Fragment {
     public static CheckoutFragment newInstance(double totalAmount, int itemCount) {
         CheckoutFragment fragment = new CheckoutFragment();
         Bundle args = new Bundle();
-        args.putDouble("total_amount", totalAmount);
+        args.putDouble("total_amount", 10);
         args.putInt("item_count", itemCount);
         fragment.setArguments(args);
         return fragment;
@@ -187,7 +187,7 @@ public class CheckoutFragment extends Fragment {
         CreatePaymentRequest paymentRequest = new CreatePaymentRequest(
             "order",
             orderId,
-            amount,
+            10,
             "PHP",
             "Order Payment"
         );
