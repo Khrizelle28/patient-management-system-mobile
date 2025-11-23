@@ -15,7 +15,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.patientmanagementsystemmobile.models.Person;
+import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -32,11 +35,14 @@ public class ServiceSelectionFragment extends Fragment {
     private String patientId;
 
     private ImageView buttonBack;
+    private ImageView imageDoctorProfile;
     private TextView textDoctorName;
     private TextView textDoctorSpecialty;
     private TextView textSelectedDate;
     private TextView textSelectedTime;
     private RadioGroup radioGroupServices;
+    private RadioButton radioPregnant;
+    private RadioButton radioNonPregnant;
     private CheckBox checkboxPapSmear;
     private CheckBox checkboxMedCert;
     private MaterialButton buttonGoToPayment;
@@ -78,11 +84,14 @@ public class ServiceSelectionFragment extends Fragment {
 
     private void initViews(View view) {
         buttonBack = view.findViewById(R.id.buttonBack);
+        imageDoctorProfile = view.findViewById(R.id.imageDoctorProfile);
         textDoctorName = view.findViewById(R.id.textDoctorName);
         textDoctorSpecialty = view.findViewById(R.id.textDoctorSpecialty);
         textSelectedDate = view.findViewById(R.id.textSelectedDate);
         textSelectedTime = view.findViewById(R.id.textSelectedTime);
         radioGroupServices = view.findViewById(R.id.radioGroupServices);
+        radioPregnant = view.findViewById(R.id.radioPregnant);
+        radioNonPregnant = view.findViewById(R.id.radioNonPregnant);
         checkboxPapSmear = view.findViewById(R.id.checkboxPapSmear);
         checkboxMedCert = view.findViewById(R.id.checkboxMedCert);
         buttonGoToPayment = view.findViewById(R.id.buttonGoToPayment);
@@ -95,6 +104,24 @@ public class ServiceSelectionFragment extends Fragment {
             textDoctorName.setText(doctorName);
             textDoctorSpecialty.setText(doctor.getSpecialty());
             textSelectedTime.setText(doctor.getSchedule());
+
+            // Load doctor's profile picture
+            if (doctor.getProfilePic() != null && !doctor.getProfilePic().isEmpty()) {
+                String imageUrl = RetrofitClient.getFullImageUrl(doctor.getProfilePic());
+                android.util.Log.d("ServiceSelection", "Doctor profile pic from API: " + doctor.getProfilePic());
+                android.util.Log.d("ServiceSelection", "Full profile pic URL: " + imageUrl);
+
+                Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_person)
+                        .error(R.drawable.ic_person)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .circleCrop()
+                        .into(imageDoctorProfile);
+            } else {
+                // Set default profile image
+                imageDoctorProfile.setImageResource(R.drawable.ic_person);
+            }
         }
 
         if (selectedDate != null) {
@@ -114,6 +141,17 @@ public class ServiceSelectionFragment extends Fragment {
             if (getParentFragmentManager() != null) {
                 getParentFragmentManager().popBackStack();
             }
+        });
+
+        // Manual handling for RadioButtons since they're inside LinearLayouts
+        radioPregnant.setOnClickListener(v -> {
+            radioPregnant.setChecked(true);
+            radioNonPregnant.setChecked(false);
+        });
+
+        radioNonPregnant.setOnClickListener(v -> {
+            radioNonPregnant.setChecked(true);
+            radioPregnant.setChecked(false);
         });
 
         buttonGoToPayment.setOnClickListener(v -> {
@@ -154,10 +192,9 @@ public class ServiceSelectionFragment extends Fragment {
     }
 
     private String getSelectedService() {
-        int selectedId = radioGroupServices.getCheckedRadioButtonId();
-        if (selectedId == R.id.radioPregnant) {
+        if (radioPregnant.isChecked()) {
             return "Pregnant";
-        } else if (selectedId == R.id.radioNonPregnant) {
+        } else if (radioNonPregnant.isChecked()) {
             return "Non - Pregnant";
         }
         return "Pregnant"; // default

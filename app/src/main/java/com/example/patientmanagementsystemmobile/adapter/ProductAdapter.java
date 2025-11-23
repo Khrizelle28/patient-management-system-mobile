@@ -22,6 +22,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.Product;
+import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 
 import java.util.List;
 
@@ -74,8 +75,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         // Load product image
         if (product.getImage() != null && !product.getImage().isEmpty()) {
-            String imageUrl = "http://10.0.2.2:8000" + product.getImage();
-            Log.d("ProductAdapter", "Loading image for " + product.getName() + ": " + imageUrl);
+            String imageUrl = RetrofitClient.getFullImageUrl(product.getImage());
+            Log.d("ProductAdapter", "Image path from API: " + product.getImage());
+            Log.d("ProductAdapter", "Full image URL for " + product.getName() + ": " + imageUrl);
 
             Glide.with(context)
                     .load(imageUrl)

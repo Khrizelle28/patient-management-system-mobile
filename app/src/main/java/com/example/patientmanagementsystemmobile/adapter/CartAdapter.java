@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.CartItem;
+import com.example.patientmanagementsystemmobile.network.RetrofitClient;
 
 import java.util.List;
 
@@ -66,7 +67,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
             // Load product image
             if (item.getProduct().getImage() != null && !item.getProduct().getImage().isEmpty()) {
-                String imageUrl = "http://10.0.2.2:8000" + item.getProduct().getImage();
+                String imageUrl = RetrofitClient.getFullImageUrl(item.getProduct().getImage());
+                android.util.Log.d("CartAdapter", "Image path from API: " + item.getProduct().getImage());
+                android.util.Log.d("CartAdapter", "Full image URL: " + imageUrl);
                 Glide.with(context)
                         .load(imageUrl)
                         .placeholder(android.R.drawable.ic_menu_gallery)

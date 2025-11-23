@@ -166,7 +166,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="For representative pickup, enter the authorized person's name"
-                    android:textSize="12sp"
+                    android:textSize="12.5sp"
                     android:textColor="#9E9E9E"
                     android:lineSpacingExtra="2dp"
                     android:layout_marginBottom="12dp" />
@@ -229,7 +229,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Kindly bring a valid ID and a prescription or authorization when the representative will pick up the medicines. Please charge the same to the authorized person and ensure they also bring their valid ID. You may not complete this transaction without this transaction."
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     android:textColor="#9E9E9E"
                     android:lineSpacingExtra="2dp"
                     android:layout_marginBottom="8dp" />

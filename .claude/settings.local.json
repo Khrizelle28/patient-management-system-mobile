@@ -25,7 +25,8 @@
       "Bash(findstr /s /i Gsauce appsrcmain*.xml appsrcmain*.java 2)",
       "Bash(powershell -Command \"Get-Content ''C:\\laragon\\www\\patient-management-system\\storage\\logs\\laravel.log'' -Tail 100 | Select-String -Pattern ''ERROR|Order|place'' -Context 2,5 | Select-Object -Last 30\")",
       "Bash(del nul)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(dir /s /b \"C:\\laragon\\www\\patient-management-system\\routes\\api.php\")"
     ],
     "deny": [],
     "ask": []

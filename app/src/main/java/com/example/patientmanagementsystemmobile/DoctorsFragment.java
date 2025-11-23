@@ -56,7 +56,6 @@ public class DoctorsFragment extends Fragment {
     private List<Medication> medicationList;
     private List<Product> productList;
     private CardView consultCard;
-    private Button seeAllButton;
     private TextView cartIcon;
     private TextView textGreeting;
     private CartRepository cartRepository;
@@ -113,7 +112,6 @@ public class DoctorsFragment extends Fragment {
 
     private void initializeViews(View view) {
         consultCard = view.findViewById(R.id.consultCard);
-        seeAllButton = view.findViewById(R.id.seeAllButton);
         medicationRecyclerView = view.findViewById(R.id.medicationRecyclerView);
         cartIcon = view.findViewById(R.id.cartIcon);
         textGreeting = view.findViewById(R.id.textGreeting);
@@ -224,11 +222,6 @@ public class DoctorsFragment extends Fragment {
         consultCard.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Opening consultation...", Toast.LENGTH_SHORT).show();
             // TODO: Navigate to consultation activity or fragment
-        });
-
-        seeAllButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Showing all medications...", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to all medications activity or expand list
         });
 
         cartIcon.setOnClickListener(v -> {
@@ -453,8 +446,9 @@ public class DoctorsFragment extends Fragment {
 
                 // Load product image
                 if (medication.getImage() != null && !medication.getImage().isEmpty()) {
-                    String imageUrl = "http://10.0.2.2:8000" + medication.getImage();
-                    android.util.Log.d("DoctorsFragment", "Loading image: " + imageUrl);
+                    String imageUrl = RetrofitClient.getFullImageUrl(medication.getImage());
+                    android.util.Log.d("DoctorsFragment", "Image path from API: " + medication.getImage());
+                    android.util.Log.d("DoctorsFragment", "Full image URL: " + imageUrl);
 
                     Glide.with(itemView.getContext())
                             .load(imageUrl)

@@ -232,8 +232,14 @@ public class AppointmentFragment extends Fragment {
             }
 
             String id = (String) doctorData.get("id");
+            String profilePic = (String) doctorData.get("profile_pic");
 
-            return new Person(id, name, specialty, schedule, isAvailable);
+            Person person = new Person(id, name, specialty, schedule, isAvailable);
+            person.setProfilePic(profilePic);
+
+            Log.d("AppointmentFragment", "Parsed doctor: " + name + ", profile_pic: " + profilePic);
+
+            return person;
         } catch (Exception e) {
             Log.e("PARSE_ERROR", "Error parsing doctor data: " + e.getMessage());
             return null;

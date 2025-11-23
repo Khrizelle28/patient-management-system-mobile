@@ -22,6 +22,9 @@ public class Person implements Serializable {
     private String email;
     private String dayOfWeek;
 
+    @SerializedName("profile_pic")
+    private String profilePic;
+
     // Default constructor
     public Person() {}
 
@@ -106,6 +109,10 @@ public class Person implements Serializable {
         return dayOfWeek;
     }
 
+    public String getProfilePic() {
+        return profilePic;
+    }
+
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -141,6 +148,10 @@ public class Person implements Serializable {
 
     public void setDayOfWeek(String dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
     @Override
