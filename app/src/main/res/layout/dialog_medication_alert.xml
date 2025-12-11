@@ -5,6 +5,22 @@
     android:orientation="vertical"
     android:padding="24dp">
 
+    <!-- Medication Name Input - MOVED TO FIRST -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Medication Name"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextMedicationName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <!-- Time Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -24,21 +40,160 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Medication Name Input -->
+    <!-- Day Selection Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Days"
+        android:textSize="14sp"
+        android:textColor="#757575"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/dayMonday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="M"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/dayTuesday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="T"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/dayWednesday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="W"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/dayThursday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="Th"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/dayFriday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="F"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/daySaturday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="Sa"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/daySunday"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="Su"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/day_button_unselected"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+    <!-- Times per day Selection -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Medication Name"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        android:hint="Times per day"
+        android:layout_marginBottom="8dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextMedicationName"
+        <AutoCompleteTextView
+            android:id="@+id/spinnerTimesPerDay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="none"
+            android:focusable="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Calculated Dose Times Display -->
+    <LinearLayout
+        android:id="@+id/calculatedTimesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="#F5F5F5"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scheduled Dose Times:"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#757575"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/textViewCalculatedTimes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#2196F3"
+            android:lineSpacingExtra="4dp" />
+
+    </LinearLayout>
 
     <!-- Remarks/Description Input -->
     <com.google.android.material.textfield.TextInputLayout

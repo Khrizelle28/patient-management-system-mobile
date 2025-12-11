@@ -12,11 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -186,110 +182,34 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
 
         // Inflate custom layout
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_medication_alert, null);
-        EditText editMedicationName = dialogView.findViewById(R.id.editTextMedicationName);
         EditText editTime = dialogView.findViewById(R.id.editTextTime);
+        EditText editMedicationName = dialogView.findViewById(R.id.editTextMedicationName);
         EditText editRemarks = dialogView.findViewById(R.id.editTextRemarks);
-        AutoCompleteTextView spinnerTimesPerDay = dialogView.findViewById(R.id.spinnerTimesPerDay);
-        LinearLayout calculatedTimesContainer = dialogView.findViewById(R.id.calculatedTimesContainer);
-        TextView textViewCalculatedTimes = dialogView.findViewById(R.id.textViewCalculatedTimes);
-
-        // Set up Times per day dropdown
-        String[] timesPerDayOptions = {"1", "2", "3", "4", "5", "6", "7"};
-        ArrayAdapter<String> timesAdapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_dropdown_item_1line, timesPerDayOptions);
-        spinnerTimesPerDay.setAdapter(timesAdapter);
-        spinnerTimesPerDay.setText("1", false); // Default to 1 time per day
-
-        // Day selection buttons
-        TextView dayMonday = dialogView.findViewById(R.id.dayMonday);
-        TextView dayTuesday = dialogView.findViewById(R.id.dayTuesday);
-        TextView dayWednesday = dialogView.findViewById(R.id.dayWednesday);
-        TextView dayThursday = dialogView.findViewById(R.id.dayThursday);
-        TextView dayFriday = dialogView.findViewById(R.id.dayFriday);
-        TextView daySaturday = dialogView.findViewById(R.id.daySaturday);
-        TextView daySunday = dialogView.findViewById(R.id.daySunday);
-
-        TextView[] dayButtons = {dayMonday, dayTuesday, dayWednesday, dayThursday, dayFriday, daySaturday, daySunday};
-        boolean[] selectedDays = new boolean[7];
 
         // If editing, populate fields
         if (isEdit) {
-            editMedicationName.setText(medication.getMedicationName());
             editTime.setText(medication.getFullTime());
+            editMedicationName.setText(medication.getMedicationName());
             editRemarks.setText(medication.getRemarks());
-
-            // Set times per day
-            int timesPerDay = medication.getDurationDays();
-            if (timesPerDay >= 1 && timesPerDay <= 7) {
-                spinnerTimesPerDay.setText(String.valueOf(timesPerDay), false);
-            }
-
-            // Parse and set selected days
-            if (medication.getSelectedDays() != null && !medication.getSelectedDays().isEmpty()) {
-                String[] days = medication.getSelectedDays().split(",");
-                for (String day : days) {
-                    try {
-                        int dayIndex = Integer.parseInt(day.trim()) - 1;
-                        if (dayIndex >= 0 && dayIndex < 7) {
-                            selectedDays[dayIndex] = true;
-                            dayButtons[dayIndex].setBackgroundResource(R.drawable.day_button_selected);
-                            dayButtons[dayIndex].setTextColor(0xFFFFFFFF);
-                        }
-                    } catch (NumberFormatException e) {
-                        // Ignore invalid day numbers
-                    }
-                }
-            }
-        }
-
-        // Add click listeners for day buttons
-        for (int i = 0; i < dayButtons.length; i++) {
-            final int dayIndex = i;
-            dayButtons[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectedDays[dayIndex] = !selectedDays[dayIndex];
-                    if (selectedDays[dayIndex]) {
-                        dayButtons[dayIndex].setBackgroundResource(R.drawable.day_button_selected);
-                        dayButtons[dayIndex].setTextColor(0xFFFFFFFF);
-                    } else {
-                        dayButtons[dayIndex].setBackgroundResource(R.drawable.day_button_unselected);
-                        dayButtons[dayIndex].setTextColor(0xFF2196F3);
-                    }
-                }
-            });
         }
 
         // Handle time picker
         editTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showTimePicker(editTime, new TimePickerCallback() {
-                    @Override
-                    public void onTimeSet(String time) {
-                        updateCalculatedTimes(editTime.getText().toString(), spinnerTimesPerDay.getText().toString(),
-                                calculatedTimesContainer, textViewCalculatedTimes);
-                    }
-                });
+                showTimePicker(editTime);
             }
-        });
-
-        // Add listener for times per day changes
-        spinnerTimesPerDay.setOnItemClickListener((parent, view, pos, id) -> {
-            updateCalculatedTimes(editTime.getText().toString(), spinnerTimesPerDay.getText().toString(),
-                    calculatedTimesContainer, textViewCalculatedTimes);
         });
 
         builder.setView(dialogView);
 
         builder.setPositiveButton(isEdit ? "Update" : "Add", (dialog, which) -> {
-            String medicationName = editMedicationName.getText().toString().trim();
             String timeStr = editTime.getText().toString().trim();
+            String medicationName = editMedicationName.getText().toString().trim();
             String remarks = editRemarks.getText().toString().trim();
-            String timesPerDayStr = spinnerTimesPerDay.getText().toString().trim();
 
-            if (medicationName.isEmpty() || timeStr.isEmpty()) {
-                Toast.makeText(getContext(), "Please fill in medication name and time", Toast.LENGTH_SHORT).show();
+            if (timeStr.isEmpty() || medicationName.isEmpty()) {
+                Toast.makeText(getContext(), "Please fill in time and medication name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -303,40 +223,12 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
             String time = timeParts[0];
             String period = timeParts[1];
 
-            // Collect selected days
-            StringBuilder selectedDaysStr = new StringBuilder();
-            for (int i = 0; i < selectedDays.length; i++) {
-                if (selectedDays[i]) {
-                    if (selectedDaysStr.length() > 0) {
-                        selectedDaysStr.append(",");
-                    }
-                    selectedDaysStr.append(i + 1);
-                }
-            }
-
-            // Parse times per day
-            int timesPerDay = 1; // Default to 1
-            if (!timesPerDayStr.isEmpty()) {
-                try {
-                    timesPerDay = Integer.parseInt(timesPerDayStr);
-                    if (timesPerDay < 1 || timesPerDay > 7) {
-                        Toast.makeText(getContext(), "Times per day must be between 1 and 7", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                    Toast.makeText(getContext(), "Invalid times per day", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-
             if (isEdit) {
                 // Update existing medication via API
-                updateMedicationAlertAPI(medication, time, period, medicationName, remarks,
-                        selectedDaysStr.toString(), timesPerDay, position);
+                updateMedicationAlertAPI(medication, time, period, medicationName, remarks, position);
             } else {
                 // Add new medication via API
-                saveMedicationAlertAPI(time, period, medicationName, remarks,
-                        selectedDaysStr.toString(), timesPerDay);
+                saveMedicationAlertAPI(time, period, medicationName, remarks);
             }
         });
 
@@ -346,12 +238,7 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
         dialog.show();
     }
 
-    // Callback interface for time picker
-    private interface TimePickerCallback {
-        void onTimeSet(String time);
-    }
-
-    private void showTimePicker(EditText editTime, TimePickerCallback callback) {
+    private void showTimePicker(EditText editTime) {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
@@ -365,189 +252,12 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
                     String formattedTime = String.format(Locale.getDefault(), "%d:%02d %s",
                             displayHour, selectedMinute, period);
                     editTime.setText(formattedTime);
-
-                    if (callback != null) {
-                        callback.onTimeSet(formattedTime);
-                    }
                 }, hour, minute, false);
 
         timePickerDialog.show();
     }
 
-    /**
-     * Update the calculated dose times display
-     */
-    private void updateCalculatedTimes(String firstDoseTime, String timesPerDayStr,
-                                       LinearLayout container, TextView textView) {
-        if (firstDoseTime == null || firstDoseTime.isEmpty() || timesPerDayStr == null || timesPerDayStr.isEmpty()) {
-            container.setVisibility(View.GONE);
-            return;
-        }
-
-        try {
-            int timesPerDay = Integer.parseInt(timesPerDayStr);
-            if (timesPerDay <= 1) {
-                container.setVisibility(View.GONE);
-                return;
-            }
-
-            List<String> doseTimes = calculateDoseTimes(firstDoseTime, timesPerDay);
-            if (doseTimes.isEmpty()) {
-                container.setVisibility(View.GONE);
-                return;
-            }
-
-            // Display the calculated times
-            StringBuilder timesText = new StringBuilder();
-            for (int i = 0; i < doseTimes.size(); i++) {
-                timesText.append("Dose ").append(i + 1).append(": ").append(doseTimes.get(i));
-                if (i < doseTimes.size() - 1) {
-                    timesText.append("\n");
-                }
-            }
-            textView.setText(timesText.toString());
-            container.setVisibility(View.VISIBLE);
-
-        } catch (NumberFormatException e) {
-            container.setVisibility(View.GONE);
-        }
-    }
-
-    /**
-     * Calculate all dose times based on first dose and times per day
-     * Example: First dose at 8:00 AM, 3 times per day -> 8:00 AM, 4:00 PM, 12:00 AM
-     */
-    private List<String> calculateDoseTimes(String firstDoseTime, int timesPerDay) {
-        List<String> doseTimes = new ArrayList<>();
-
-        try {
-            // Parse the first dose time
-            String[] parts = firstDoseTime.split(" ");
-            if (parts.length != 2) return doseTimes;
-
-            String time = parts[0];
-            String period = parts[1];
-
-            String[] timeParts = time.split(":");
-            if (timeParts.length != 2) return doseTimes;
-
-            int hour = Integer.parseInt(timeParts[0]);
-            int minute = Integer.parseInt(timeParts[1]);
-
-            // Convert to 24-hour format
-            if (period.equals("PM") && hour != 12) {
-                hour += 12;
-            } else if (period.equals("AM") && hour == 12) {
-                hour = 0;
-            }
-
-            // Calculate interval in minutes
-            int intervalMinutes = (24 * 60) / timesPerDay;
-
-            // Generate all dose times
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, hour);
-            calendar.set(Calendar.MINUTE, minute);
-
-            for (int i = 0; i < timesPerDay; i++) {
-                int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                int currentMinute = calendar.get(Calendar.MINUTE);
-
-                // Format the time
-                String currentPeriod = currentHour >= 12 ? "PM" : "AM";
-                int displayHour = currentHour % 12;
-                if (displayHour == 0) displayHour = 12;
-
-                String formattedTime = String.format(Locale.getDefault(), "%d:%02d %s",
-                        displayHour, currentMinute, currentPeriod);
-                doseTimes.add(formattedTime);
-
-                // Add interval for next dose
-                calendar.add(Calendar.MINUTE, intervalMinutes);
-            }
-
-        } catch (Exception e) {
-            Log.e("RxAlertFragment", "Error calculating dose times", e);
-        }
-
-        return doseTimes;
-    }
-
-    private void saveMedicationAlertAPI(String firstTime, String firstPeriod, String medicationName, String remarks,
-                                        String selectedDays, int timesPerDay) {
-        String patientId = RetrofitClient.currentUser.getId();
-
-        // Get current date as start date
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String startDate = sdf.format(new java.util.Date());
-
-        // Calculate all dose times
-        String firstDoseTime = firstTime + " " + firstPeriod;
-        List<String> doseTimes = calculateDoseTimes(firstDoseTime, timesPerDay);
-
-        if (doseTimes.isEmpty()) {
-            Toast.makeText(getContext(), "Failed to calculate dose times", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Counter for tracking successful creations
-        final int[] successCount = {0};
-        final int totalDoses = doseTimes.size();
-
-        // Create a medication alert for each dose time
-        for (int i = 0; i < doseTimes.size(); i++) {
-            String doseTime = doseTimes.get(i);
-            String[] parts = doseTime.split(" ");
-            String time = parts[0];
-            String period = parts[1];
-
-            MedicationAlertRequest request = new MedicationAlertRequest(
-                    patientId,
-                    time,
-                    period,
-                    medicationName,
-                    remarks,
-                    true,
-                    selectedDays,  // selected_days from user input
-                    startDate,     // start_date - automatically set to today
-                    timesPerDay    // duration_days stores times per day (1-7)
-            );
-
-            Call<MedicationAlertResponse> call = apiService.createMedicationAlert(request);
-            call.enqueue(new Callback<MedicationAlertResponse>() {
-                @Override
-                public void onResponse(Call<MedicationAlertResponse> call, Response<MedicationAlertResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        MedicationAlertResponse alertResponse = response.body();
-
-                        if (alertResponse.isSuccess()) {
-                            successCount[0]++;
-
-                            // Get the newly created alert and schedule alarm
-                            if (alertResponse.getAlert() != null) {
-                                MedicationAlert newAlert = alertResponse.getAlert().toMedicationAlert();
-                                AlarmScheduler.scheduleAlarm(requireContext(), newAlert);
-                            }
-
-                            // Show success message and reload when all doses are created
-                            if (successCount[0] == totalDoses) {
-                                Toast.makeText(getContext(), "Medication alerts added successfully (" + totalDoses + " doses)", Toast.LENGTH_SHORT).show();
-                                loadMedicationAlertsFromAPI();
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<MedicationAlertResponse> call, Throwable t) {
-                    Log.e("API_ERROR", "Failed to create dose: " + t.getMessage());
-                }
-            });
-        }
-    }
-
-    private void updateMedicationAlertAPI(MedicationAlert medication, String time, String period, String medicationName,
-                                          String remarks, String selectedDays, int timesPerDay, int position) {
+    private void saveMedicationAlertAPI(String time, String period, String medicationName, String remarks) {
         String patientId = RetrofitClient.currentUser.getId();
 
         MedicationAlertRequest request = new MedicationAlertRequest(
@@ -556,10 +266,52 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
                 period,
                 medicationName,
                 remarks,
-                medication.isEnabled(),
-                selectedDays,  // selected_days from user input
-                medication.getStartDate() != null ? medication.getStartDate() : "",  // keep existing start date
-                timesPerDay    // duration_days stores times per day (1-7)
+                true
+        );
+
+        Call<MedicationAlertResponse> call = apiService.createMedicationAlert(request);
+        call.enqueue(new Callback<MedicationAlertResponse>() {
+            @Override
+            public void onResponse(Call<MedicationAlertResponse> call, Response<MedicationAlertResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    MedicationAlertResponse alertResponse = response.body();
+
+                    if (alertResponse.isSuccess()) {
+                        Toast.makeText(getContext(), "Medication alert added successfully", Toast.LENGTH_SHORT).show();
+
+                        // Get the newly created alert and schedule alarm
+                        if (alertResponse.getAlert() != null) {
+                            MedicationAlert newAlert = alertResponse.getAlert().toMedicationAlert();
+                            AlarmScheduler.scheduleAlarm(requireContext(), newAlert);
+                        }
+
+                        // Reload the list from API
+                        loadMedicationAlertsFromAPI();
+                    } else {
+                        Toast.makeText(getContext(), alertResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to add medication alert", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MedicationAlertResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateMedicationAlertAPI(MedicationAlert medication, String time, String period, String medicationName, String remarks, int position) {
+        String patientId = RetrofitClient.currentUser.getId();
+
+        MedicationAlertRequest request = new MedicationAlertRequest(
+                patientId,
+                time,
+                period,
+                medicationName,
+                remarks,
+                medication.isEnabled()
         );
 
         Call<MedicationAlertResponse> call = apiService.updateMedicationAlert(medication.getId(), request);
@@ -658,10 +410,7 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
                 medication.getPeriod(),
                 medication.getMedicationName(),
                 medication.getRemarks(),
-                isEnabled,
-                medication.getSelectedDays() != null ? medication.getSelectedDays() : "",
-                medication.getStartDate() != null ? medication.getStartDate() : "",
-                medication.getDurationDays()
+                isEnabled
         );
 
         Call<MedicationAlertResponse> call = apiService.updateMedicationAlert(medication.getId(), request);

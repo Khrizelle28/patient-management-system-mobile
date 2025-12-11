@@ -7,14 +7,21 @@ public class MedicationAlertRequest {
     private String medication_name;
     private String remarks;
     private boolean is_enabled;
+    private String selected_days;
+    private String start_date;
+    private int duration_days;
 
-    public MedicationAlertRequest(String patient_id, String time, String period, String medication_name, String remarks, boolean is_enabled) {
+    public MedicationAlertRequest(String patient_id, String time, String period, String medication_name, String remarks, boolean is_enabled,
+                                  String selected_days, String start_date, int duration_days) {
         this.patient_id = patient_id;
         this.time = time;
         this.period = period;
         this.medication_name = medication_name;
         this.remarks = remarks;
         this.is_enabled = is_enabled;
+        this.selected_days = selected_days;
+        this.start_date = start_date;
+        this.duration_days = duration_days;
     }
 
     // Getters
@@ -42,6 +49,18 @@ public class MedicationAlertRequest {
         return is_enabled;
     }
 
+    public String getSelected_days() {
+        return selected_days;
+    }
+
+    public String getStart_date() {
+        return start_date;
+    }
+
+    public int getDuration_days() {
+        return duration_days;
+    }
+
     // Setters
     public void setPatient_id(String patient_id) {
         this.patient_id = patient_id;
@@ -65,5 +84,17 @@ public class MedicationAlertRequest {
 
     public void setIs_enabled(boolean is_enabled) {
         this.is_enabled = is_enabled;
+    }
+
+    public void setSelected_days(String selected_days) {
+        this.selected_days = selected_days;
+    }
+
+    public void setStart_date(String start_date) {
+        this.start_date = start_date;
+    }
+
+    public void setDuration_days(int duration_days) {
+        this.duration_days = duration_days;
     }
 }
