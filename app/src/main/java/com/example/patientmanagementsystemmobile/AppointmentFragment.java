@@ -452,11 +452,16 @@ public class AppointmentFragment extends Fragment {
         // e.g., call API, save to database, etc.
 //        Log.d("AppointmentBooking", "Booking appointment for: " + person.toString() + "ID of Patient use: " + formattedDate + " " + person.getSchedule());
 //        Log.d("User: ", "User Details" + id);
+        // Get email from current user or use empty string
+        String email = RetrofitClient.currentUser != null && RetrofitClient.currentUser.getEmail() != null
+                ? RetrofitClient.currentUser.getEmail() : "";
+
         AppointmentRequest request = new AppointmentRequest(
                 id,
                 person.getId(), // doctor ID
                 formattedDate, // format: "2024-12-25"
                 person.getSchedule(), // format: "14:30"
+                email, // email
                 "" // notes
         );
 //

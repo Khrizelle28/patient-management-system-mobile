@@ -6,6 +6,7 @@ public class AppointmentRequest {
     private String doctor_id;
     private String appointment_date;
     private String appointment_time;
+    private String email;
     private String notes;
     private String service_type;
     private Double service_price;
@@ -15,21 +16,23 @@ public class AppointmentRequest {
     private Double medical_certificate_price;
     private Double total_amount;
 
-    public AppointmentRequest(String patientId, String doctorId, String date, String time, String notes) {
+    public AppointmentRequest(String patientId, String doctorId, String date, String time, String email, String notes) {
         this.patient_id = patientId;
         this.doctor_id = doctorId;
         this.appointment_date = date;
         this.appointment_time = time;
+        this.email = email;
         this.notes = notes;
     }
 
-    public AppointmentRequest(String patientId, String doctorId, String date, String time, String notes,
+    public AppointmentRequest(String patientId, String doctorId, String date, String time, String email, String notes,
                              String serviceType, Double servicePrice, Boolean hasPapSmear, Double papSmearPrice,
                              Boolean needsMedicalCertificate, Double medicalCertificatePrice, Double totalAmount) {
         this.patient_id = patientId;
         this.doctor_id = doctorId;
         this.appointment_date = date;
         this.appointment_time = time;
+        this.email = email;
         this.notes = notes;
         this.service_type = serviceType;
         this.service_price = servicePrice;
@@ -52,6 +55,9 @@ public class AppointmentRequest {
 
     public String getAppointment_time() { return appointment_time; }
     public void setAppointment_time(String appointment_time) { this.appointment_time = appointment_time; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

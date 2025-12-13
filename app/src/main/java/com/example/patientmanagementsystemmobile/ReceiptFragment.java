@@ -244,12 +244,17 @@ public class ReceiptFragment extends Fragment {
         // Total amount - only base service price (other services paid at clinic)
         double totalAmount = servicePrice;
 
+        // Get email from current user or use empty string
+        String email = RetrofitClient.currentUser != null && RetrofitClient.currentUser.getEmail() != null
+                ? RetrofitClient.currentUser.getEmail() : "";
+
         // Create appointment request
         AppointmentRequest request = new AppointmentRequest(
                 patientId,
                 doctor.getId(),
                 selectedDate,
                 doctor.getSchedule(),
+                email,
                 notes.toString(),
                 service,
                 10.0,

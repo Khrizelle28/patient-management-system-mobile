@@ -92,7 +92,11 @@ public class CheckoutActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         btnPlaceOrder.setEnabled(false);
 
-        PlaceOrderRequest request = new PlaceOrderRequest(deliveryAddress, contactNumber, notes);
+        // Get email from current user or use empty string
+        String email = RetrofitClient.currentUser != null && RetrofitClient.currentUser.getEmail() != null
+                ? RetrofitClient.currentUser.getEmail() : "";
+
+        PlaceOrderRequest request = new PlaceOrderRequest(deliveryAddress, contactNumber, email, notes);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         apiService.placeOrder(request).enqueue(new Callback<OrderResponse>() {

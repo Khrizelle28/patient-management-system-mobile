@@ -3,11 +3,13 @@ package com.example.patientmanagementsystemmobile.request;
 public class PlaceOrderRequest {
     private String pickup_name;
     private String contact_number;
+    private String email;
     private String notes;
 
-    public PlaceOrderRequest(String pickup_name, String contact_number, String notes) {
+    public PlaceOrderRequest(String pickup_name, String contact_number, String email, String notes) {
         this.pickup_name = pickup_name;
         this.contact_number = contact_number;
+        this.email = email;
         this.notes = notes;
     }
 
@@ -25,6 +27,14 @@ public class PlaceOrderRequest {
 
     public void setContact_number(String contact_number) {
         this.contact_number = contact_number;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getNotes() {

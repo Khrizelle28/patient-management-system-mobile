@@ -34,7 +34,7 @@ public class CheckoutFragment extends Fragment {
 
     private static final int REQUEST_CODE_PAYMENT = 1001;
 
-    private TextInputEditText etPickupName, etPhoneNumber, etRemarks;
+    private TextInputEditText etPickupName, etPhoneNumber, etEmail, etRemarks;
     private TextView tvItemCount, tvTotalAmount;
     private MaterialButton btnPlaceOrder;
     private ProgressBar progressBar;
@@ -70,6 +70,7 @@ public class CheckoutFragment extends Fragment {
         btnBack = view.findViewById(R.id.btnBack);
         etPickupName = view.findViewById(R.id.etDeliveryAddress);
         etPhoneNumber = view.findViewById(R.id.etContactNumber);
+        etEmail = view.findViewById(R.id.etEmail);
         etRemarks = view.findViewById(R.id.etRemarks);
         tvItemCount = view.findViewById(R.id.tvItemCount);
         tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
@@ -87,6 +88,7 @@ public class CheckoutFragment extends Fragment {
         if (RetrofitClient.currentUser != null) {
             String fullName = RetrofitClient.currentUser.getFullName();
             String contactNo = RetrofitClient.currentUser.getContactNo();
+            String email = RetrofitClient.currentUser.getEmail();
 
             if (fullName != null && !fullName.isEmpty()) {
                 etPickupName.setText(fullName);
@@ -94,6 +96,10 @@ public class CheckoutFragment extends Fragment {
 
             if (contactNo != null && !contactNo.isEmpty()) {
                 etPhoneNumber.setText(contactNo);
+            }
+
+            if (email != null && !email.isEmpty()) {
+                etEmail.setText(email);
             }
         }
     }
@@ -118,6 +124,7 @@ public class CheckoutFragment extends Fragment {
         btnPlaceOrder.setOnClickListener(v -> {
             String pickupName = etPickupName.getText().toString().trim();
             String phoneNumber = etPhoneNumber.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
             String remarks = etRemarks.getText().toString().trim();
 
             if (pickupName.isEmpty()) {
@@ -132,16 +139,23 @@ public class CheckoutFragment extends Fragment {
                 return;
             }
 
+            // Validate email only if provided
+            if (!email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                etEmail.setError("Please enter a valid email address");
+                etEmail.requestFocus();
+                return;
+            }
+
             // Only send user's remarks to notes, not the pickup time message
-            placeOrder(pickupName, phoneNumber, remarks);
+            placeOrder(pickupName, phoneNumber, email, remarks);
         });
     }
 
-    private void placeOrder(String pickupName, String phoneNumber, String notes) {
+    private void placeOrder(String pickupName, String phoneNumber, String email, String notes) {
         progressBar.setVisibility(View.VISIBLE);
         btnPlaceOrder.setEnabled(false);
 
-        PlaceOrderRequest request = new PlaceOrderRequest(pickupName, phoneNumber, notes);
+        PlaceOrderRequest request = new PlaceOrderRequest(pickupName, phoneNumber, email, notes);
 
         apiService.placeOrder(request).enqueue(new Callback<OrderResponse>() {
             @Override

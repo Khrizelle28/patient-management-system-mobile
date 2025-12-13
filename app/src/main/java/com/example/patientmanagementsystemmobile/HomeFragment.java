@@ -1,4 +1,6 @@
 package com.example.patientmanagementsystemmobile;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.widget.Toast;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +40,8 @@ public class HomeFragment extends Fragment {
     private TextView textWelcome;
     private TextView textUpcomingAppointments;
     private ProgressBar progressBar;
+    private CardView cardWomensHealth;
+    private CardView cardMaternalHealth;
 
     private ApiService apiService;
     private String currentPatientId = RetrofitClient.currentUser.getId(); // Replace with actual patient ID from your app's session/preferences
@@ -59,10 +64,49 @@ public class HomeFragment extends Fragment {
         textWelcome = view.findViewById(R.id.textWelcome);
         textUpcomingAppointments = view.findViewById(R.id.textUpcomingAppointments);
         progressBar = view.findViewById(R.id.progressBar);
+        cardWomensHealth = view.findViewById(R.id.cardWomensHealth);
+        cardMaternalHealth = view.findViewById(R.id.cardMaternalHealth);
 
-        // Set welcome message
-        textWelcome.setText("");
+        // Set welcome message with user name
+        if (RetrofitClient.currentUser != null && RetrofitClient.currentUser.getFullName() != null) {
+            textWelcome.setText("Hello " + RetrofitClient.currentUser.getFullName() + "!");
+        } else {
+            textWelcome.setText("Hello User!");
+        }
+
         textUpcomingAppointments.setText("Your Appointments");
+
+        // Set up click listeners for health resource cards
+        setupHealthResourceCards();
+    }
+
+    private void setupHealthResourceCards() {
+        // Women's Health Card - opens womenshealth.gov
+        cardWomensHealth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openWebUrl("https://womenshealth.gov/healthy-eating/healthy-eating-and-women");
+            }
+        });
+
+        // Maternal Health Card - opens WHO maternal health page
+        cardMaternalHealth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openWebUrl("https://www.who.int/health-topics/maternal-health#tab=tab_1");
+            }
+        });
+    }
+
+    private void openWebUrl(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Unable to open link", Toast.LENGTH_SHORT).show();
+            Log.e("HomeFragment", "Error opening URL: " + url, e);
+        }
     }
 
     private void setupRecyclerView() {

@@ -310,18 +310,19 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Note: The doctor will determine if the patient really needs to avail medical certificate or undergo a Pap smear payment will be made at the clinic"
+                android:text="Note: The attending physician will determine whether the patient requires a medical certificate or a Pap smear. Please note that payment for both the medical certificate and the Pap smear will be made directly at the clinic."
                 android:textSize="15sp"
                 android:textColor="#888888"
                 android:textStyle="italic"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="24dp"
+                android:justificationMode="inter_word"/>
 
             <!-- Go to Payment Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonGoToPayment"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Go to Payment"
+                android:text="Proceed"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="#2196F3"

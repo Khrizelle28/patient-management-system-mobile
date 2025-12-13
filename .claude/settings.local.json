@@ -14,7 +14,8 @@
       "Bash(./gradlew:*)",
       "Bash(git checkout:*)",
       "Bash(timeout 5 cat:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(dir \"C:\\laragon\\www\\patient-management-system\" /b)"
     ],
     "deny": [],
     "ask": []
