@@ -159,8 +159,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
-        android:background="@drawable/day_button_unselected"
         android:padding="12dp"
+        android:background="@drawable/spinner_border"
         android:layout_marginBottom="16dp" />
 
     <!-- First Dose Time Input -->
