@@ -26,16 +26,34 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- Time -->
-            <TextView
-                android:id="@+id/textViewTime"
+            <!-- Time and Day -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="7:00"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="2dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="2dp">
+
+                <TextView
+                    android:id="@+id/textViewTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7:00"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/textViewDay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" Sunday"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginLeft="8dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
             <!-- Period and Medication -->
             <LinearLayout
@@ -241,15 +259,14 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/progressBarIntake"
+        <!-- Segmented Progress Bar Container -->
+        <LinearLayout
+            android:id="@+id/segmentedProgressContainer"
             android:layout_width="match_parent"
             android:layout_height="8dp"
             android:layout_marginTop="4dp"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:progressTint="#27AE60"
-            android:max="100"
-            android:progress="0" />
+            android:orientation="horizontal"
+            android:weightSum="1" />
 
     </LinearLayout>
 

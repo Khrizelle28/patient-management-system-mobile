@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -13,11 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.patientmanagementsystemmobile.R;
 import com.example.patientmanagementsystemmobile.models.MedicationAlert;
+import com.example.patientmanagementsystemmobile.models.MedicationAlarmDisplayItem;
 import com.example.patientmanagementsystemmobile.utils.MedicationIntakeTracker;
 import java.util.List;
 
 public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.MedicationViewHolder> {
-    private List<MedicationAlert> medicationList;
+    private List<MedicationAlarmDisplayItem> displayItemList;
     private OnMedicationActionListener listener;
     private Context context;
     private MedicationIntakeTracker intakeTracker;
@@ -29,8 +31,8 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
         void onMarkAsTaken(MedicationAlert medication, int position);
     }
 
-    public MedicationAdapter(List<MedicationAlert> medicationList, Context context) {
-        this.medicationList = medicationList;
+    public MedicationAdapter(List<MedicationAlarmDisplayItem> displayItemList, Context context) {
+        this.displayItemList = displayItemList;
         this.context = context;
         this.intakeTracker = new MedicationIntakeTracker(context);
     }
@@ -39,16 +41,16 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
         this.listener = listener;
     }
 
-    public void updateList(List<MedicationAlert> newList) {
-        this.medicationList = newList;
+    public void updateList(List<MedicationAlarmDisplayItem> newList) {
+        this.displayItemList = newList;
         notifyDataSetChanged();
     }
 
     public void removeItem(int position) {
-        if (position >= 0 && position < medicationList.size()) {
-            medicationList.remove(position);
+        if (position >= 0 && position < displayItemList.size()) {
+            displayItemList.remove(position);
             notifyItemRemoved(position);
-            if (medicationList.isEmpty()) {
+            if (displayItemList.isEmpty()) {
                 notifyDataSetChanged();
             }
         }
@@ -63,25 +65,27 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
 
     @Override
     public void onBindViewHolder(@NonNull MedicationViewHolder holder, int position) {
-        MedicationAlert medication = medicationList.get(position);
-        holder.bind(medication, position);
+        MedicationAlarmDisplayItem displayItem = displayItemList.get(position);
+        holder.bind(displayItem, position);
     }
 
     @Override
     public int getItemCount() {
-        return medicationList.size();
+        return displayItemList.size();
     }
 
     public class MedicationViewHolder extends RecyclerView.ViewHolder {
         private TextView timeTextView, periodTextView, medicationNameTextView, remarksTextView, durationTextView, progressTextView;
         private TextView dayMonday, dayTuesday, dayWednesday, dayThursday, dayFriday, daySaturday, daySunday;
+        private TextView textViewDay;
         private Switch medicationSwitch;
         private Button editButton, deleteButton, markTakenButton;
-        private ProgressBar progressBar;
+        private LinearLayout segmentedProgressContainer;
 
         public MedicationViewHolder(@NonNull View itemView) {
             super(itemView);
             timeTextView = itemView.findViewById(R.id.textViewTime);
+            textViewDay = itemView.findViewById(R.id.textViewDay);
             periodTextView = itemView.findViewById(R.id.textViewPeriod);
             medicationNameTextView = itemView.findViewById(R.id.textViewMedicationName);
             remarksTextView = itemView.findViewById(R.id.textViewRemarks);
@@ -90,7 +94,7 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             editButton = itemView.findViewById(R.id.buttonEdit);
             deleteButton = itemView.findViewById(R.id.buttonDelete);
             markTakenButton = itemView.findViewById(R.id.buttonMarkTaken);
-            progressBar = itemView.findViewById(R.id.progressBarIntake);
+            segmentedProgressContainer = itemView.findViewById(R.id.segmentedProgressContainer);
             progressTextView = itemView.findViewById(R.id.textViewProgress);
             dayMonday = itemView.findViewById(R.id.dayMonday);
             dayTuesday = itemView.findViewById(R.id.dayTuesday);
@@ -101,9 +105,23 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             daySunday = itemView.findViewById(R.id.daySunday);
         }
 
-        public void bind(MedicationAlert medication, int position) {
-            timeTextView.setText(medication.getTime());
-            periodTextView.setText(medication.getPeriod());
+        public void bind(MedicationAlarmDisplayItem displayItem, int position) {
+            MedicationAlert medication = displayItem.getMedication();
+            int alarmIndex = displayItem.getAlarmIndex();
+            MedicationAlert.AlarmTime alarmTime = displayItem.getAlarmTime();
+
+            // Display time
+            timeTextView.setText(alarmTime.getTime());
+            periodTextView.setText(alarmTime.getPeriod());
+
+            // Display day name for prescribed pieces medications
+            if (displayItem.isPrescribedPieces() && displayItem.getCalculatedDayName() != null && !displayItem.getCalculatedDayName().isEmpty()) {
+                textViewDay.setText(displayItem.getCalculatedDayName());
+                textViewDay.setVisibility(View.VISIBLE);
+            } else {
+                textViewDay.setVisibility(View.GONE);
+            }
+
             medicationNameTextView.setText(medication.getMedicationName());
             medicationSwitch.setChecked(medication.isEnabled());
             if (medication.getRemarks() != null && !medication.getRemarks().isEmpty()) {
@@ -112,9 +130,9 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             } else {
                 remarksTextView.setVisibility(View.GONE);
             }
-            updateProgress(medication);
-            displaySelectedDays(medication.getSelectedDays());
-            displayDurationInfo(medication.getSelectedDays(), medication.getDurationDays());
+            updateProgress(medication, alarmIndex);
+            displaySelectedDays(medication);
+            displayDurationInfo(medication);
             medicationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -125,9 +143,18 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             markTakenButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!intakeTracker.wasTakenToday(medication.getId())) {
-                        intakeTracker.markAsTaken(medication.getId());
-                        updateProgress(medication);
+                    // For prescribed pieces, check if this specific alarm has been taken
+                    boolean alreadyTaken = displayItem.isPrescribedPieces()
+                        ? intakeTracker.wasTakenToday(medication.getId(), alarmIndex)
+                        : intakeTracker.wasTakenToday(medication.getId());
+
+                    if (!alreadyTaken) {
+                        if (displayItem.isPrescribedPieces()) {
+                            MedicationIntakeTracker.markAsTaken(context, medication.getId(), alarmIndex);
+                        } else {
+                            intakeTracker.markAsTaken(medication.getId());
+                        }
+                        updateProgress(medication, alarmIndex);
                         if (listener != null) listener.onMarkAsTaken(medication, position);
                     }
                 }
@@ -146,30 +173,55 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             });
         }
 
-        private void updateProgress(MedicationAlert medication) {
-            boolean takenToday = intakeTracker.wasTakenToday(medication.getId());
+        private void updateProgress(MedicationAlert medication, int alarmIndex) {
             boolean hasExpired = intakeTracker.hasExpired(medication.getStartDate(), medication.getDurationDays());
-            boolean isTodaySelected = isTodaySelectedDay(medication.getSelectedDays());
-            int totalSelectedDays = countSelectedDays(medication.getSelectedDays());
-            int daysCompletedThisWeek = intakeTracker.getWeeklyIntakeCount(medication.getId(), medication.getSelectedDays());
-            progressTextView.setText(daysCompletedThisWeek + "/" + totalSelectedDays + " doses");
-            int progressPercent = totalSelectedDays > 0 ? (daysCompletedThisWeek * 100) / totalSelectedDays : 0;
-            progressBar.setProgress(progressPercent);
-            boolean isLate = isMoreThan1MinuteLate(medication.getTime(), medication.getPeriod());
-            if (!takenToday && isLate && isTodaySelected && !hasExpired) {
-                progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(0xFFE74C3C));
+
+            // Check if this is a prescribed pieces medication
+            boolean isPrescribedPieces = medication.getPrescribedPieces() > 0;
+
+            int totalDoses;
+            int completedDoses;
+            boolean isTodaySelected;
+            boolean thisAlarmTaken;
+
+            if (isPrescribedPieces) {
+                // Prescribed pieces: total = prescribed pieces, count all taken doses
+                totalDoses = medication.getPrescribedPieces();
+                completedDoses = countTotalIntake(medication.getId(), totalDoses);
+                // For prescribed pieces, medication is always "available" (not day-specific)
+                isTodaySelected = true;
+                // Check if THIS specific alarm has been taken
+                thisAlarmTaken = intakeTracker.wasTakenToday(medication.getId(), alarmIndex);
             } else {
-                progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(0xFF27AE60));
+                // Legacy weekly recurring: use old logic
+                isTodaySelected = isTodaySelectedDay(medication.getSelectedDays());
+                totalDoses = calculateTotalDoses(medication.getSelectedDays(), medication.getAlarmTimes().size());
+                completedDoses = intakeTracker.getWeeklyIntakeCount(medication.getId(), medication.getSelectedDays());
+                thisAlarmTaken = intakeTracker.wasTakenToday(medication.getId());
             }
-            if (hasExpired) {
-                markTakenButton.setText("Expired");
+
+            progressTextView.setText(completedDoses + "/" + totalDoses + " doses");
+
+            // Get dose statuses (0=not taken, 1=green/on time, 2=red/late)
+            int[] doseStatuses = intakeTracker.getWeeklyDoseStatuses(
+                medication.getId(),
+                medication.getSelectedDays(),
+                medication.getAlarmTimes()
+            );
+
+            // Create segmented progress bar
+            createSegmentedProgressBar(doseStatuses, totalDoses);
+
+            // Determine button state based on THIS specific alarm
+            if (hasExpired || (isPrescribedPieces && completedDoses >= totalDoses)) {
+                markTakenButton.setText("Completed");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
-            } else if (!isTodaySelected) {
+            } else if (!isPrescribedPieces && !isTodaySelected) {
                 markTakenButton.setText("Not Today");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
-            } else if (takenToday) {
+            } else if (thisAlarmTaken) {
                 markTakenButton.setText("Taken");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
@@ -199,9 +251,47 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             return selectedDays.split(",").length;
         }
 
-        private void displaySelectedDays(String selectedDays) {
+        private int calculateTotalDoses(String selectedDays, int timesPerDay) {
+            int numDays = countSelectedDays(selectedDays);
+            int doses = timesPerDay > 0 ? timesPerDay : 1;
+            return numDays * doses;
+        }
+
+        /**
+         * Count total intake for prescribed pieces medications
+         */
+        private int countTotalIntake(int medicationId, int totalDoses) {
+            int count = 0;
+            String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                    .format(new java.util.Date());
+
+            // Count how many doses have been taken across all alarm indices
+            for (int alarmIdx = 0; alarmIdx < totalDoses; alarmIdx++) {
+                // Check if this alarm index was taken on any day
+                // For now, just check today (can be expanded to check all days since start)
+                String key = "taken_" + today + "_" + medicationId + "_" + alarmIdx;
+                android.content.SharedPreferences prefs = context.getSharedPreferences(
+                        "medication_intake", android.content.Context.MODE_PRIVATE);
+                if (prefs.getBoolean(key, false)) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private void displaySelectedDays(MedicationAlert medication) {
             TextView[] dayViews = {dayMonday, dayTuesday, dayWednesday, dayThursday, dayFriday, daySaturday, daySunday};
+
+            // Check if this is a prescribed pieces medication
+            if (medication.getPrescribedPieces() > 0 && medication.getStartDay() != null) {
+                // Hide all day buttons for prescribed pieces (or show only start day)
+                for (TextView dayView : dayViews) dayView.setVisibility(View.GONE);
+                return;
+            }
+
+            // Legacy: show selected days
             for (TextView dayView : dayViews) dayView.setVisibility(View.GONE);
+            String selectedDays = medication.getSelectedDays();
             if (selectedDays != null && !selectedDays.isEmpty()) {
                 String[] days = selectedDays.split(",");
                 for (String dayStr : days) {
@@ -218,27 +308,42 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             }
         }
 
-        private void displayDurationInfo(String selectedDays, int durationDays) {
-            String[] dayNames = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        private void displayDurationInfo(MedicationAlert medication) {
             StringBuilder durationText = new StringBuilder();
-            if (selectedDays == null || selectedDays.isEmpty()) {
-                durationText.append("No days selected");
-            } else {
-                String[] days = selectedDays.split(",");
-                if (days.length == 7) {
-                    durationText.append("Everyday");
-                } else {
-                    for (int i = 0; i < days.length; i++) {
-                        try {
-                            int day = Integer.parseInt(days[i].trim());
-                            if (day >= 1 && day <= 7) {
-                                if (i > 0) durationText.append(", ");
-                                durationText.append(dayNames[day - 1]);
-                            }
-                        } catch (NumberFormatException e) {}
-                    }
+
+            // Check if this is a prescribed pieces medication
+            if (medication.getPrescribedPieces() > 0 && medication.getStartDay() != null) {
+                // Display prescribed pieces format
+                durationText.append("Starting ").append(medication.getStartDay());
+                durationText.append(" - ").append(medication.getPrescribedPieces()).append(" doses");
+                if (medication.getTimesPerDay() > 0) {
+                    durationText.append(" (").append(medication.getTimesPerDay()).append("x/day)");
                 }
-                if (durationDays > 0) durationText.append(" for ").append(durationDays).append(" days");
+            } else {
+                // Legacy format
+                String[] dayNames = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+                String selectedDays = medication.getSelectedDays();
+                int durationDays = medication.getDurationDays();
+
+                if (selectedDays == null || selectedDays.isEmpty()) {
+                    durationText.append("No days selected");
+                } else {
+                    String[] days = selectedDays.split(",");
+                    if (days.length == 7) {
+                        durationText.append("Everyday");
+                    } else {
+                        for (int i = 0; i < days.length; i++) {
+                            try {
+                                int day = Integer.parseInt(days[i].trim());
+                                if (day >= 1 && day <= 7) {
+                                    if (i > 0) durationText.append(", ");
+                                    durationText.append(dayNames[day - 1]);
+                                }
+                            } catch (NumberFormatException e) {}
+                        }
+                    }
+                    if (durationDays > 0) durationText.append(" for ").append(durationDays).append(" days");
+                }
             }
             durationTextView.setText(durationText.toString());
         }
@@ -259,6 +364,54 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
                 return minutesDifference > 1;
             } catch (Exception e) {
                 return false;
+            }
+        }
+
+        /**
+         * Create segmented progress bar with color-coded doses
+         * @param doseStatuses Array of dose statuses (0=not taken, 1=green/on time, 2=red/late)
+         * @param totalDoses Total number of doses
+         */
+        private void createSegmentedProgressBar(int[] doseStatuses, int totalDoses) {
+            segmentedProgressContainer.removeAllViews();
+
+            if (totalDoses == 0) return;
+
+            for (int i = 0; i < totalDoses; i++) {
+                View segment = new View(context);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    1.0f / totalDoses
+                );
+
+                // Add small margin between segments
+                if (i > 0) {
+                    params.leftMargin = 2;
+                }
+
+                segment.setLayoutParams(params);
+
+                // Set color based on status
+                int color;
+                if (i < doseStatuses.length) {
+                    switch (doseStatuses[i]) {
+                        case 1: // Taken on time - Green
+                            color = 0xFF27AE60;
+                            break;
+                        case 2: // Taken late - Red
+                            color = 0xFFE74C3C;
+                            break;
+                        default: // Not taken - Light gray
+                            color = 0xFFE0E0E0;
+                            break;
+                    }
+                } else {
+                    color = 0xFFE0E0E0; // Default gray for future doses
+                }
+
+                segment.setBackgroundColor(color);
+                segmentedProgressContainer.addView(segment);
             }
         }
     }

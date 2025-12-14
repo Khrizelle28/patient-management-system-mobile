@@ -20,21 +20,32 @@ public class AlarmScheduler {
     private static final String TAG = "AlarmScheduler";
 
     /**
-     * Schedule an alarm for a medication alert
+     * Schedule alarms for a medication alert (one for each alarm time)
      */
     public static void scheduleAlarm(Context context, MedicationAlert medication) {
         Log.d(TAG, "==========================================");
         Log.d(TAG, "scheduleAlarm() called");
         Log.d(TAG, "Medication: " + medication.getMedicationName());
-        Log.d(TAG, "Time: " + medication.getFullTime());
+        Log.d(TAG, "Alarm times: " + medication.getAlarmTimes().size());
         Log.d(TAG, "Enabled: " + medication.isEnabled());
         Log.d(TAG, "==========================================");
 
         if (!medication.isEnabled()) {
-            Log.d(TAG, "❌ Medication is disabled, not scheduling alarm");
+            Log.d(TAG, "❌ Medication is disabled, not scheduling alarms");
             return;
         }
 
+        // Schedule a separate alarm for each alarm time
+        for (int i = 0; i < medication.getAlarmTimes().size(); i++) {
+            scheduleAlarmForTime(context, medication, medication.getAlarmTimes().get(i), i);
+        }
+    }
+
+    /**
+     * Schedule a single alarm for a specific alarm time
+     */
+    public static void scheduleAlarmForTime(Context context, MedicationAlert medication,
+                                            MedicationAlert.AlarmTime alarmTime, int alarmIndex) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
             Log.e(TAG, "❌ AlarmManager is null");
@@ -53,116 +64,93 @@ public class AlarmScheduler {
             }
         }
 
+        // Create unique request code: medicationId * 100 + alarmIndex
+        int requestCode = medication.getId() * 100 + alarmIndex;
+
         Intent intent = new Intent(context, AlarmReceiver.class);
         intent.putExtra("alert_id", medication.getId());
+        intent.putExtra("alarm_index", alarmIndex);
         intent.putExtra("medication_name", medication.getMedicationName());
         intent.putExtra("remarks", medication.getRemarks());
-        intent.putExtra("time", medication.getTime());
-        intent.putExtra("period", medication.getPeriod());
+        intent.putExtra("time", alarmTime.getTime());
+        intent.putExtra("period", alarmTime.getPeriod());
         intent.putExtra("is_enabled", medication.isEnabled());
+        intent.putExtra("selected_days", medication.getSelectedDays());
+        intent.putExtra("start_date", medication.getStartDate());
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
-                medication.getId(),
+                requestCode,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         );
 
-        Log.d(TAG, "✓ PendingIntent created with ID: " + medication.getId());
+        Log.d(TAG, "✓ PendingIntent created with request code: " + requestCode + " for " + alarmTime.getFullTime());
 
         // Parse time
-        Calendar calendar = parseTimeToCalendar(medication.getTime(), medication.getPeriod());
+        Calendar calendar = parseTimeToCalendar(alarmTime.getTime(), alarmTime.getPeriod());
         if (calendar == null) {
-            Log.e(TAG, "Failed to parse time: " + medication.getFullTime());
+            Log.e(TAG, "Failed to parse time: " + alarmTime.getFullTime());
             return;
         }
 
         Calendar now = Calendar.getInstance();
+        String selectedDays = medication.getSelectedDays();
 
-        Log.d(TAG, "Current time: " + now.getTime().toString());
-        Log.d(TAG, "Scheduled time (parsed): " + calendar.getTime().toString());
+        // Find next occurrence on a selected day
+        calendar = findNextSelectedDayOccurrence(calendar, now, selectedDays);
 
-        // If the time is within 2 minutes from now, schedule it immediately (add 10 seconds buffer)
-        long timeDifference = calendar.getTimeInMillis() - now.getTimeInMillis();
-        long minutesDiff = timeDifference / 1000 / 60;
+        Log.d(TAG, "Scheduled time for " + alarmTime.getFullTime() + ": " + calendar.getTime().toString());
 
-        Log.d(TAG, "Time difference: " + minutesDiff + " minutes (" + timeDifference + " ms)");
-
-        if (timeDifference < 0 && timeDifference > -120000) { // Within past 2 minutes
-            Log.d(TAG, "⏰ Time just passed (within 2 min), scheduling for next occurrence in 1 day");
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-        } else if (timeDifference < 0) {
-            // If the time has already passed by more than 2 minutes, schedule for tomorrow
-            Log.d(TAG, "⏰ Time already passed, scheduling for tomorrow");
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-        } else if (timeDifference < 10000) { // Less than 10 seconds away
-            Log.d(TAG, "⏰ Time is very close, adding small buffer");
-            // Add small buffer to ensure alarm has time to be set
-            calendar.add(Calendar.SECOND, 10);
-        } else {
-            Log.d(TAG, "⏰ Time is in the future, scheduling for today");
-        }
-
-        Log.d(TAG, "Final scheduled time: " + calendar.getTime().toString());
-
-        // IMPORTANT: setRepeating() is NOT reliable on Android 12+ for exact alarms
-        // We must use setExact/setExactAndAllowWhileIdle and reschedule after each trigger
+        // Schedule the alarm
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // For Android 12+, use setExactAndAllowWhileIdle (most reliable)
                 if (alarmManager.canScheduleExactAlarms()) {
-                    Log.d(TAG, "📱 Android 12+ - using setExactAndAllowWhileIdle (EXACT, RELIABLE)");
                     alarmManager.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             calendar.getTimeInMillis(),
                             pendingIntent
                     );
-                    Log.d(TAG, "✅ Alarm SET using setExactAndAllowWhileIdle");
                 } else {
-                    Log.w(TAG, "⚠️ Cannot schedule exact alarms - using setAndAllowWhileIdle");
                     alarmManager.setAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             calendar.getTimeInMillis(),
                             pendingIntent
                     );
-                    Log.d(TAG, "✅ Alarm SET using setAndAllowWhileIdle");
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // For Android 6.0+, use setExactAndAllowWhileIdle
-                Log.d(TAG, "📱 Android 6.0+ - using setExactAndAllowWhileIdle");
                 alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.getTimeInMillis(),
                         pendingIntent
                 );
-                Log.d(TAG, "✅ Alarm SET using setExactAndAllowWhileIdle");
             } else {
-                // For older Android versions, use setExact
-                Log.d(TAG, "📱 Android < 6.0 - using setExact");
                 alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP,
                         calendar.getTimeInMillis(),
                         pendingIntent
                 );
-                Log.d(TAG, "✅ Alarm SET using setExact");
             }
 
-            Log.d(TAG, "✅✅✅ SUCCESS! Alarm scheduled for " + medication.getMedicationName() + " at " + medication.getFullTime());
-            Log.d(TAG, "Scheduled time: " + calendar.getTime().toString());
-            Log.d(TAG, "⚠️ NOTE: Alarm will fire ONCE. AlarmReceiver must reschedule for next day.");
-            Log.d(TAG, "==========================================");
-
-            Toast.makeText(context,
-                "Alarm set for " + medication.getMedicationName() + " at " + medication.getFullTime(),
-                Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "✅ Alarm " + (alarmIndex + 1) + " scheduled for " + alarmTime.getFullTime());
 
         } catch (Exception e) {
-            Log.e(TAG, "❌❌❌ FAILED to schedule alarm: " + e.getMessage());
+            Log.e(TAG, "❌ FAILED to schedule alarm: " + e.getMessage());
             e.printStackTrace();
-            Toast.makeText(context,
-                "Failed to schedule alarm: " + e.getMessage(),
-                Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Find the next occurrence of the alarm time on a selected day
+     */
+    private static Calendar findNextSelectedDayOccurrence(Calendar alarmTime, Calendar now, String selectedDays) {
+        // If alarm time is in the future today and today is selected, use it
+        if (alarmTime.getTimeInMillis() > now.getTimeInMillis() && isTodaySelectedDay(selectedDays, now)) {
+            return alarmTime;
+        }
+
+        // Otherwise, find the next selected day
+        return findNextSelectedDayFirstDose(alarmTime, now, selectedDays);
     }
 
     /**
@@ -226,7 +214,7 @@ public class AlarmScheduler {
     }
 
     /**
-     * Cancel an alarm for a medication alert
+     * Cancel all alarms for a medication alert (all alarm time indices)
      */
     public static void cancelAlarm(Context context, int alertId) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -235,18 +223,22 @@ public class AlarmScheduler {
             return;
         }
 
-        Intent intent = new Intent(context, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context,
-                alertId,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-        );
+        // Cancel all possible alarm indices (0-99)
+        for (int i = 0; i < 100; i++) {
+            int requestCode = alertId * 100 + i;
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+            );
 
-        alarmManager.cancel(pendingIntent);
-        pendingIntent.cancel();
+            alarmManager.cancel(pendingIntent);
+            pendingIntent.cancel();
+        }
 
-        Log.d(TAG, "Alarm canceled for ID: " + alertId);
+        Log.d(TAG, "All alarms canceled for medication ID: " + alertId);
     }
 
     /**
@@ -255,6 +247,155 @@ public class AlarmScheduler {
     public static void rescheduleAlarm(Context context, MedicationAlert medication) {
         cancelAlarm(context, medication.getId());
         scheduleAlarm(context, medication);
+    }
+
+    /**
+     * Find next dose considering 24-hour cycles that start on selected days
+     * @param firstDoseTime The time of the first dose (e.g., 1:00 PM)
+     * @param now Current time
+     * @param intervalMs Interval between doses in milliseconds
+     * @param selectedDays Comma-separated day numbers (1=Mon, 7=Sun)
+     * @param timesPerDay Number of doses per day
+     * @return Calendar set to next dose time
+     */
+    private static Calendar findNextDoseInCycle(Calendar firstDoseTime, Calendar now,
+                                                long intervalMs, String selectedDays,
+                                                int timesPerDay) {
+
+        // CASE 1: First dose hasn't happened yet today
+        if (firstDoseTime.getTimeInMillis() > now.getTimeInMillis()) {
+            // Check if today is a selected day
+            if (isTodaySelectedDay(selectedDays, now)) {
+                Log.d(TAG, "First dose is in future and today is selected, scheduling for today");
+                return firstDoseTime; // Schedule first dose today
+            } else {
+                // Find next selected day and schedule first dose
+                Log.d(TAG, "First dose is in future but today is NOT selected, finding next selected day");
+                return findNextSelectedDayFirstDose(firstDoseTime, now, selectedDays);
+            }
+        }
+
+        // CASE 2: First dose already happened today - check if in current cycle
+        Calendar todayFirstDose = (Calendar) now.clone();
+        todayFirstDose.set(Calendar.HOUR_OF_DAY, firstDoseTime.get(Calendar.HOUR_OF_DAY));
+        todayFirstDose.set(Calendar.MINUTE, firstDoseTime.get(Calendar.MINUTE));
+        todayFirstDose.set(Calendar.SECOND, 0);
+        todayFirstDose.set(Calendar.MILLISECOND, 0);
+
+        long timeSinceFirstDoseToday = now.getTimeInMillis() - todayFirstDose.getTimeInMillis();
+
+        // Calculate how many doses have occurred in today's cycle
+        long dosesElapsed = timeSinceFirstDoseToday / intervalMs;
+
+        // Calculate next dose time
+        Calendar nextDose = (Calendar) todayFirstDose.clone();
+        nextDose.setTimeInMillis(todayFirstDose.getTimeInMillis() + ((dosesElapsed + 1) * intervalMs));
+
+        // Check if next dose would exceed 24-hour cycle
+        long timeSinceFirstDoseForNext = nextDose.getTimeInMillis() - todayFirstDose.getTimeInMillis();
+        long hoursSinceFirst = timeSinceFirstDoseForNext / (1000 * 60 * 60);
+
+        if (hoursSinceFirst >= 24 || dosesElapsed + 1 >= timesPerDay) {
+            // Cycle complete - find next selected day
+            Log.d(TAG, "24-hour cycle complete (hours: " + hoursSinceFirst + ", doses: " + (dosesElapsed + 1) + "/" + timesPerDay + "), finding next selected day");
+            return findNextSelectedDayFirstDose(firstDoseTime, now, selectedDays);
+        } else {
+            // Still within cycle - schedule next dose
+            Log.d(TAG, "Within cycle, scheduling dose " + (dosesElapsed + 2) + "/" + timesPerDay + " at " + nextDose.getTime());
+            return nextDose;
+        }
+    }
+
+    /**
+     * Find the next selected day and return first dose time on that day
+     */
+    private static Calendar findNextSelectedDayFirstDose(Calendar firstDoseTime,
+                                                         Calendar now,
+                                                         String selectedDays) {
+        if (selectedDays == null || selectedDays.isEmpty()) {
+            // No selected days - schedule for tomorrow
+            Calendar tomorrow = (Calendar) firstDoseTime.clone();
+            tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+            Log.d(TAG, "No selected days, scheduling for tomorrow at " + tomorrow.getTime());
+            return tomorrow;
+        }
+
+        // Parse selected days
+        String[] days = selectedDays.split(",");
+        int[] selectedDayNumbers = new int[days.length];
+        for (int i = 0; i < days.length; i++) {
+            try {
+                selectedDayNumbers[i] = Integer.parseInt(days[i].trim());
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid day number: " + days[i]);
+            }
+        }
+
+        // Start checking from tomorrow
+        Calendar checkDate = (Calendar) now.clone();
+        checkDate.add(Calendar.DAY_OF_YEAR, 1);
+        checkDate.set(Calendar.HOUR_OF_DAY, firstDoseTime.get(Calendar.HOUR_OF_DAY));
+        checkDate.set(Calendar.MINUTE, firstDoseTime.get(Calendar.MINUTE));
+        checkDate.set(Calendar.SECOND, 0);
+        checkDate.set(Calendar.MILLISECOND, 0);
+
+        // Check up to 7 days ahead
+        for (int i = 0; i < 7; i++) {
+            int dayOfWeek = checkDate.get(Calendar.DAY_OF_WEEK);
+            int dayNum = (dayOfWeek == Calendar.SUNDAY) ? 7 : dayOfWeek - 1;
+
+            for (int selectedDay : selectedDayNumbers) {
+                if (selectedDay == dayNum) {
+                    Log.d(TAG, "Next selected day: " + getDayName(dayNum) + " at " + checkDate.getTime());
+                    return checkDate;
+                }
+            }
+
+            checkDate.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        // Fallback: schedule for tomorrow
+        Calendar tomorrow = (Calendar) firstDoseTime.clone();
+        tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+        Log.w(TAG, "Could not find selected day in next 7 days, using tomorrow as fallback");
+        return tomorrow;
+    }
+
+    /**
+     * Check if today is one of the selected days
+     */
+    private static boolean isTodaySelectedDay(String selectedDays, Calendar now) {
+        if (selectedDays == null || selectedDays.isEmpty()) {
+            return true; // No selected days = every day
+        }
+
+        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+        int todayNum = (dayOfWeek == Calendar.SUNDAY) ? 7 : dayOfWeek - 1;
+
+        String[] days = selectedDays.split(",");
+        for (String day : days) {
+            try {
+                if (Integer.parseInt(day.trim()) == todayNum) {
+                    Log.d(TAG, "Today (" + getDayName(todayNum) + ") is a selected day");
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid day number: " + day);
+            }
+        }
+        Log.d(TAG, "Today (" + getDayName(todayNum) + ") is NOT a selected day");
+        return false;
+    }
+
+    /**
+     * Get day name from day number (1=Monday, 7=Sunday)
+     */
+    private static String getDayName(int dayNum) {
+        String[] dayNames = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        if (dayNum >= 1 && dayNum <= 7) {
+            return dayNames[dayNum - 1];
+        }
+        return "Unknown";
     }
 
     /**
