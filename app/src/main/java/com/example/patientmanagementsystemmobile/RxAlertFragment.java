@@ -918,8 +918,8 @@ public class RxAlertFragment extends Fragment implements MedicationAdapter.OnMed
 
     @Override
     public void onMarkAsTaken(MedicationAlert medication, int position) {
-        // Refresh the adapter to update progress display
-        adapter.notifyItemChanged(position);
+        // Refresh ALL items to update progress display across all cards for this medication
+        adapter.notifyDataSetChanged();
         Toast.makeText(getContext(), medication.getMedicationName() + " marked as taken", Toast.LENGTH_SHORT).show();
     }
 }
