@@ -378,6 +378,85 @@ public class MedicationIntakeTracker {
     }
 
     /**
+     * Get dose statuses for prescribed pieces medications
+     * Returns array of status codes: 0=not taken (gray), 1=taken (green), 2=skipped/late (red)
+     */
+    public int[] getPrescribedPiecesDoseStatuses(int medicationId, List<MedicationAlert.AlarmTime> alarmTimes, String startDate, int timesPerDay) {
+        if (alarmTimes == null || alarmTimes.isEmpty() || startDate == null) {
+            return new int[0];
+        }
+
+        int[] statuses = new int[alarmTimes.size()];
+        String today = getTodayDate();
+        Calendar now = Calendar.getInstance();
+
+        // Parse start date
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+        Calendar startCal = Calendar.getInstance();
+        try {
+            Date startDateObj = sdf.parse(startDate);
+            if (startDateObj != null) {
+                startCal.setTime(startDateObj);
+            } else {
+                return statuses; // All zeros (gray)
+            }
+        } catch (Exception e) {
+            return statuses; // All zeros (gray)
+        }
+
+        // Calculate interval
+        int intervalHours = timesPerDay > 0 ? 24 / timesPerDay : 24;
+
+        // Get the FIRST dose time to use as base
+        if (alarmTimes.isEmpty()) {
+            return statuses;
+        }
+
+        MedicationAlert.AlarmTime firstDose = alarmTimes.get(0);
+        String[] firstTimeParts = firstDose.getTime().split(":");
+        int firstHour = Integer.parseInt(firstTimeParts[0]);
+        int firstMinute = Integer.parseInt(firstTimeParts[1]);
+
+        // Convert to 24-hour format
+        if (firstDose.getPeriod().equals("PM") && firstHour != 12) {
+            firstHour += 12;
+        } else if (firstDose.getPeriod().equals("AM") && firstHour == 12) {
+            firstHour = 0;
+        }
+
+        // Check each alarm
+        for (int alarmIdx = 0; alarmIdx < alarmTimes.size(); alarmIdx++) {
+            // Check if this alarm was taken
+            String key = "taken_" + today + "_" + medicationId + "_" + alarmIdx;
+            boolean wasTaken = prefs.getBoolean(key, false);
+
+            if (wasTaken) {
+                statuses[alarmIdx] = 1; // Green - taken
+            } else {
+                // Calculate scheduled timestamp from START DATE using FIRST dose time
+                Calendar scheduledCal = (Calendar) startCal.clone();
+                scheduledCal.set(Calendar.HOUR_OF_DAY, firstHour);
+                scheduledCal.set(Calendar.MINUTE, firstMinute);
+                scheduledCal.set(Calendar.SECOND, 0);
+                scheduledCal.set(Calendar.MILLISECOND, 0);
+
+                // Add interval hours for this alarm index
+                scheduledCal.add(Calendar.HOUR_OF_DAY, alarmIdx * intervalHours);
+
+                // Check if more than 5 minutes late
+                long timeDifference = now.getTimeInMillis() - scheduledCal.getTimeInMillis();
+                if (timeDifference > 300000) { // 5 minutes = 300,000 ms
+                    statuses[alarmIdx] = 2; // Red - skipped/late
+                } else {
+                    statuses[alarmIdx] = 0; // Gray - not taken yet (still within window or future)
+                }
+            }
+        }
+
+        return statuses;
+    }
+
+    /**
      * Clean up old intake records (older than 30 days)
      */
     public void cleanupOldRecords() {

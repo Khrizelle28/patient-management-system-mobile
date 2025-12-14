@@ -44,9 +44,9 @@ public class AlarmReceiver extends BroadcastReceiver {
             NotificationHelper.showNotification(context, alertId * 100 + alarmIndex, medicationName, remarks);
             Log.d(TAG, "✓ Notification shown successfully for: " + medicationName);
 
-            // Track intake (this will be used by progress bar)
-            MedicationIntakeTracker.markAsTaken(context, alertId, alarmIndex);
-            Log.d(TAG, "✓ Intake tracked for alarm index: " + alarmIndex);
+            // Note: User must manually mark as taken via the app UI
+            // Do NOT auto-mark as taken - let the user click "Mark as Taken" button
+            Log.d(TAG, "⏳ Waiting for user to mark as taken");
 
             // Note: Alarms are one-time only in prescribed pieces mode - no rescheduling
             Log.d(TAG, "✅ Alarm completed - one-time dose alarm (no rescheduling)");

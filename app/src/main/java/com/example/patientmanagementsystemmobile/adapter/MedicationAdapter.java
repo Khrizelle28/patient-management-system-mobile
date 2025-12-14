@@ -203,11 +203,23 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
             progressTextView.setText(completedDoses + "/" + totalDoses + " doses");
 
             // Get dose statuses (0=not taken, 1=green/on time, 2=red/late)
-            int[] doseStatuses = intakeTracker.getWeeklyDoseStatuses(
-                medication.getId(),
-                medication.getSelectedDays(),
-                medication.getAlarmTimes()
-            );
+            int[] doseStatuses;
+            if (isPrescribedPieces) {
+                // Use prescribed pieces specific method (pass start DATE not start DAY)
+                doseStatuses = intakeTracker.getPrescribedPiecesDoseStatuses(
+                    medication.getId(),
+                    medication.getAlarmTimes(),
+                    medication.getStartDate(),
+                    medication.getTimesPerDay()
+                );
+            } else {
+                // Use weekly recurring method
+                doseStatuses = intakeTracker.getWeeklyDoseStatuses(
+                    medication.getId(),
+                    medication.getSelectedDays(),
+                    medication.getAlarmTimes()
+                );
+            }
 
             // Create segmented progress bar
             createSegmentedProgressBar(doseStatuses, totalDoses);
@@ -217,18 +229,35 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Me
                 markTakenButton.setText("Completed");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
+                markTakenButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF999999));
             } else if (!isPrescribedPieces && !isTodaySelected) {
                 markTakenButton.setText("Not Today");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
+                markTakenButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF999999));
             } else if (thisAlarmTaken) {
                 markTakenButton.setText("Taken");
                 markTakenButton.setEnabled(false);
                 markTakenButton.setAlpha(0.5f);
+                markTakenButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF27AE60));
             } else {
-                markTakenButton.setText("Mark as Taken");
-                markTakenButton.setEnabled(true);
-                markTakenButton.setAlpha(1.0f);
+                // Check if this specific alarm is skipped (red status)
+                boolean isSkipped = false;
+                if (isPrescribedPieces && alarmIndex >= 0 && alarmIndex < doseStatuses.length) {
+                    isSkipped = doseStatuses[alarmIndex] == 2; // Red/skipped
+                }
+
+                if (isSkipped) {
+                    markTakenButton.setText("Skipped");
+                    markTakenButton.setEnabled(false);
+                    markTakenButton.setAlpha(0.5f);
+                    markTakenButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE74C3C));
+                } else {
+                    markTakenButton.setText("Mark as Taken");
+                    markTakenButton.setEnabled(true);
+                    markTakenButton.setAlpha(1.0f);
+                    markTakenButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF27AE60));
+                }
             }
         }
 
