@@ -25,6 +25,7 @@ import com.example.patientmanagementsystemmobile.request.ExecutePaymentRequest;
 import com.example.patientmanagementsystemmobile.response.AppointmentResponse;
 import com.example.patientmanagementsystemmobile.response.PaymentResponse;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -59,6 +60,7 @@ public class ReceiptFragment extends Fragment {
 
     private ImageView buttonBack;
     private TextView textPatientName;
+    private TextInputEditText editTextEmail;
     private TextView textAmountPaid;
     private LinearLayout layoutServicesList;
     private TextView textDateTime;
@@ -123,6 +125,7 @@ public class ReceiptFragment extends Fragment {
     private void initViews(View view) {
         buttonBack = view.findViewById(R.id.buttonBack);
         textPatientName = view.findViewById(R.id.textPatientName);
+        editTextEmail = view.findViewById(R.id.editTextEmail);
         textAmountPaid = view.findViewById(R.id.textAmountPaid);
         layoutServicesList = view.findViewById(R.id.layoutServicesList);
         textDateTime = view.findViewById(R.id.textDateTime);
@@ -244,9 +247,11 @@ public class ReceiptFragment extends Fragment {
         // Total amount - only base service price (other services paid at clinic)
         double totalAmount = servicePrice;
 
-        // Get email from current user or use empty string
-        String email = RetrofitClient.currentUser != null && RetrofitClient.currentUser.getEmail() != null
-                ? RetrofitClient.currentUser.getEmail() : "";
+        // Get email from input field, fall back to current user email
+        String email = editTextEmail.getText().toString().trim();
+        if (email.isEmpty() && RetrofitClient.currentUser != null && RetrofitClient.currentUser.getEmail() != null) {
+            email = RetrofitClient.currentUser.getEmail();
+        }
 
         // Create appointment request
         AppointmentRequest request = new AppointmentRequest(
