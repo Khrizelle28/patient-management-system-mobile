@@ -172,12 +172,17 @@ public class HomeFragment extends Fragment {
             String doctorName = "Dr. " + (data.getDoctor() != null ? data.getDoctor().getName() : "Unknown");
             String specialty = data.getDoctor() != null ? data.getDoctor().getSpecialty() : "General";
 
+            // Format patient name from the current user
+            String patientName = RetrofitClient.currentUser != null ?
+                RetrofitClient.currentUser.getFullName() : "Patient";
+
             // Format date and time
             String formattedDate = formatDate(data.getAppointment_date());
             String formattedTime = data.getAppointment_time();
 
             Appointment appointment = new Appointment(
                     data.getId(),
+                    patientName,
                     doctorName,
                     specialty,
                     formattedDate,

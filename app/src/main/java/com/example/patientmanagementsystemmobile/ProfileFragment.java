@@ -29,6 +29,7 @@ public class ProfileFragment extends Fragment {
     private TextView userName;
     private LinearLayout logoutLayout;
     private LinearLayout orderHistoryLayout;
+    private LinearLayout appointmentHistoryLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,6 +51,7 @@ public class ProfileFragment extends Fragment {
         userName = view.findViewById(R.id.userName);
         logoutLayout = view.findViewById(R.id.logoutLayout);
         orderHistoryLayout = view.findViewById(R.id.activityHistoryLayout);
+        appointmentHistoryLayout = view.findViewById(R.id.appointmentHistoryLayout);
     }
 
     private void loadUserData() {
@@ -141,13 +143,23 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setClickListeners() {
-        logoutLayout.setOnClickListener(v -> {
-            showLogoutDialog();
-        });
+        if (logoutLayout != null) {
+            logoutLayout.setOnClickListener(v -> {
+                showLogoutDialog();
+            });
+        }
 
-        orderHistoryLayout.setOnClickListener(v -> {
-            navigateToOrderHistory();
-        });
+        if (orderHistoryLayout != null) {
+            orderHistoryLayout.setOnClickListener(v -> {
+                navigateToOrderHistory();
+            });
+        }
+
+        if (appointmentHistoryLayout != null) {
+            appointmentHistoryLayout.setOnClickListener(v -> {
+                navigateToAppointmentHistory();
+            });
+        }
     }
 
     private void navigateToOrderHistory() {
@@ -155,6 +167,15 @@ public class ProfileFragment extends Fragment {
         OrderHistoryFragment orderHistoryFragment = new OrderHistoryFragment();
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
         transaction.replace(R.id.frame_layout, orderHistoryFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void navigateToAppointmentHistory() {
+        // Navigate to AppointmentHistoryFragment
+        AppointmentHistoryFragment appointmentHistoryFragment = new AppointmentHistoryFragment();
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, appointmentHistoryFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }

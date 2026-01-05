@@ -1,11 +1,14 @@
 package com.example.patientmanagementsystemmobile.adapter;
 
 // AppointmentAdapter.java
+import android.app.Dialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -55,8 +58,8 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
         // Set click listener
         holder.itemView.setOnClickListener(v -> {
-            // Handle appointment item click
-            // You can implement navigation to appointment details here
+            // Show appointment details dialog
+            showAppointmentDetailsDialog(appointment);
         });
     }
 
@@ -99,6 +102,52 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
             default:
                 return android.R.color.black;
         }
+    }
+
+    private void showAppointmentDetailsDialog(Appointment appointment) {
+        // Create dialog
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_appointment_details);
+        dialog.setCancelable(true);
+
+        // Get dialog views
+        TextView textDialogAppointmentId = dialog.findViewById(R.id.textDialogAppointmentId);
+        TextView textDialogPatientName = dialog.findViewById(R.id.textDialogPatientName);
+        TextView textDialogDoctorName = dialog.findViewById(R.id.textDialogDoctorName);
+        TextView textDialogSpecialty = dialog.findViewById(R.id.textDialogSpecialty);
+        TextView textDialogDate = dialog.findViewById(R.id.textDialogDate);
+        TextView textDialogTime = dialog.findViewById(R.id.textDialogTime);
+        TextView textDialogStatus = dialog.findViewById(R.id.textDialogStatus);
+        TextView textDialogPurpose = dialog.findViewById(R.id.textDialogPurpose);
+        Button buttonClose = dialog.findViewById(R.id.buttonClose);
+
+        // Set appointment details
+        textDialogAppointmentId.setText("#" + appointment.getId());
+        textDialogPatientName.setText(appointment.getPatientName() != null ?
+                appointment.getPatientName() : "N/A");
+        textDialogDoctorName.setText(appointment.getDoctorName());
+        textDialogSpecialty.setText(appointment.getSpecialty());
+        textDialogDate.setText(appointment.getDate());
+        textDialogTime.setText(appointment.getTime());
+        textDialogStatus.setText(appointment.getStatus());
+        textDialogPurpose.setText(appointment.getPurpose());
+
+        // Set status color
+        int statusColor = getStatusColor(appointment.getStatus());
+        textDialogStatus.setTextColor(ContextCompat.getColor(context, statusColor));
+
+        // Close button listener
+        buttonClose.setOnClickListener(v -> dialog.dismiss());
+
+        // Make dialog width match parent with some padding
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialog.show();
     }
 
     static class AppointmentViewHolder extends RecyclerView.ViewHolder {

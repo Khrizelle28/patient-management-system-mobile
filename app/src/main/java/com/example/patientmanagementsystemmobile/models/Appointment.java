@@ -4,6 +4,7 @@ import com.example.patientmanagementsystemmobile.enums.AppointmentStatus;
 
 public class Appointment {
     private int id;
+    private String patientName;
     private String doctorName;
     private String specialty;
     private String date;
@@ -22,8 +23,21 @@ public class Appointment {
         this.status = status;
     }
 
+    public Appointment(int id, String patientName, String doctorName, String specialty,
+                       String date, String time, String purpose, String status) {
+        this.id = id;
+        this.patientName = patientName;
+        this.doctorName = doctorName;
+        this.specialty = specialty;
+        this.date = date;
+        this.time = time;
+        this.purpose = purpose;
+        this.status = status;
+    }
+
     // Getters
     public int getId() { return id; }
+    public String getPatientName() { return patientName; }
     public String getDoctorName() { return doctorName; }
     public String getSpecialty() { return specialty; }
     public String getDate() { return date; }
@@ -33,6 +47,7 @@ public class Appointment {
 
     // Setters
     public void setId(int id) { this.id = id; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
     public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
     public void setSpecialty(String specialty) { this.specialty = specialty; }
     public void setDate(String date) { this.date = date; }
